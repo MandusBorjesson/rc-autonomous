@@ -42,8 +42,8 @@ void SysTick_Handler(void) {}
 #endif /* __cplusplus */
 
 void TIM16_IRQHandler(void) {
-  run = 1;
-//  __SEV();
+  TIM16->SR &= ~TIM_SR_UIF; // Clear interrupt
+  enter_run();
 }
 
 #ifdef __cplusplus

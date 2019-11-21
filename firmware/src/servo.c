@@ -3,7 +3,7 @@
 #include "stm32f0xx.h"
 
 void servo_init(void) {
-  RCC->AHBENR |= RCC_AHBENR_GPIOBEN; // Needed?
+  RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
   SERVO_IOBANK->MODER = GPIO_MODER_MODER0_1; // Alternate function
   SERVO_IOBANK->OSPEEDR = GPIO_OSPEEDER_OSPEEDR0_0 |
                            GPIO_OSPEEDER_OSPEEDR0_1;
