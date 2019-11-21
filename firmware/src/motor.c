@@ -19,7 +19,7 @@ RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
 
 void motor_init_timer(void) {
   RCC->APB1ENR |= RCC_APB1ENR_TIM3EN; // Enable clock
-  MOTOR_TIM->PSC = 0;  // Prescaler
+  MOTOR_TIM->PSC = 8;  // Prescaler
   MOTOR_TIM->ARR = 127; // Count to this value (resolution)
   MOTOR_TIM->CCR1 = 0;
   MOTOR_TIM->CCR2 = 0;

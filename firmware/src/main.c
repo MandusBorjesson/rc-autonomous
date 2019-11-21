@@ -36,14 +36,14 @@ int main(void)
 {
 
 /* MCU Configuration--------------------------------------------------------*/
-//  SystemClock_Config();
+  sysclk_cfg();
   setup_main();
   motor_init();
 //  buzzer_init();
 //  servo_init();
 
   motor_set_ilim(150);
-  motor_set_speed(100);
+  motor_set_speed(0);
 
   RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
   GPIOB->MODER = GPIO_MODER_MODER2_0;
@@ -61,13 +61,54 @@ int main(void)
 }
 
 /**
-  * @brief System Clock Configuration
+  * @brief System Clock Configuration, 24 MHz using HSI and PLL
   * @retval None
   */
+void sysclk_cfg(void)
+{
+/*-------------------------- HSI/HSI14 Configuration -----------------------*/
+  RCC->CR |= RCC_CR_HSION;
 
-// void SystemClock_Config(void)
-// {
-// }
+  while ((RCC->CR & RCC_CR_HSIRDY) == 0) {}
+
+  // Clock calibration
+  RCC->CR &= ~RCC_CR_HSITRIM;
+  RCC->CR |= 16u << RCC_CR_HSITRIM_Pos;
+
+  RCC->CR2 |= RCC_CR2_HSI14DIS;
+  RCC->CR2 |= RCC_CR2_HSI14ON;
+
+  // Wait for HSI14
+  while ((RCC->CR2 & RCC_CR2_HSI14RDY) == 0) {}
+
+  // Clock calibration
+  RCC->CR2 &= ~RCC_CR2_HSI14TRIM;
+  RCC->CR2 |= 16u << RCC_CR2_HSI14TRIM_Pos;
+
+/*-------------------------------- PLL Configuration -----------------------*/
+  RCC->CR &= ~RCC_CR_PLLON;
+
+  // Wait for PLL
+  while ((RCC->CR & RCC_CR_PLLRDY) != 0) {}
+
+  RCC->CFGR = RCC_CFGR_PLLMUL6 |
+               RCC_CFGR_PLLSRC_HSI_DIV2;
+  RCC->CFGR2 = RCC_CFGR2_PREDIV_1;
+
+  RCC->CR |= RCC_CR_PLLON;
+
+  // Wait for PLL
+  while ((RCC->CR & RCC_CR_PLLRDY) == 0) {}
+
+/*--------------------- CPU/Peripheral Configuration -----------------------*/
+  RCC->CFGR |= RCC_CFGR_HPRE_DIV1;
+  RCC->CFGR |= RCC_CFGR_SW_PLL;
+
+  // Wait for PLL
+  while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL) {}
+
+  RCC->CFGR |= RCC_CFGR_PPRE_DIV1;
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.
@@ -81,7 +122,7 @@ void Error_Handler(void) {}
   */
 void setup_main(void) {
   RCC->APB2ENR |= RCC_APB2ENR_TIM16EN; // Enable clock
-  MAIN_LOOP_TIMER->PSC = 1600;
+  MAIN_LOOP_TIMER->PSC = 2400;
   MAIN_LOOP_TIMER->ARR = LOOP_INTERVAL_MS;
   MAIN_LOOP_TIMER->DIER = TIM_DIER_UIE;
   MAIN_LOOP_TIMER->EGR |= TIM_EGR_UG;
