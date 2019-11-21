@@ -10,10 +10,11 @@ extern "C" {
 #include "stm32f0xx.h"
 
 /* Private defines -----------------------------------------------------------*/
-#define LOOP_INTERVAL_MS 100
+#define LOOP_INTERVAL_MS 200
 #define MAIN_LOOP_TIMER TIM16
 
 void Error_Handler(void);
+void sysclk_cfg(void);
 void setup_main(void);
 void enter_sleep(void);
 void enter_run(void);
