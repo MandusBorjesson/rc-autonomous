@@ -41,7 +41,7 @@ void motor_init_timer(void) {
 }
 
 void motor_init_ilim(void) {
-  RCC->APB1ENR |= RCC_APB1ENR_DACEN; /* (1) */
+  RCC->APB1ENR |= RCC_APB1ENR_DACEN;
   DAC->CR |= DAC_CR_EN1;
   DAC->DHR8R1 = 0;
 }
