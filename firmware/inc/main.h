@@ -13,9 +13,11 @@ extern "C" {
 #define LOOP_INTERVAL_MS 200
 #define MAIN_LOOP_TIMER TIM16
 
-void Error_Handler(void);
 void sysclk_cfg(void);
 void setup_main(void);
+void setup_status_led(void);
+void status_red(void);
+void status_grn(void);
 void enter_sleep(void);
 void enter_run(void);
 
