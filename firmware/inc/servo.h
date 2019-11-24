@@ -7,6 +7,7 @@
 #endif
 
 /* Includes ------------------------------------------------------------------*/
+#include "main.h"
 
 #define SERVO_TIM TIM1
 #define SERVO_IOBANK GPIOB

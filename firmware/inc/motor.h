@@ -7,7 +7,7 @@
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include <stdint.h>
+#include "main.h"
 
 #define MOTOR_DAC DAC
 #define MOTOR_IOBANK GPIOA

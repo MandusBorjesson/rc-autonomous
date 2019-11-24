@@ -38,7 +38,6 @@ int main(void)
 /* MCU Configuration--------------------------------------------------------*/
   sysclk_cfg();
   setup_main();
-  setup_status_led();
   motor_init();
 //  buzzer_init();
 //  servo_init();
@@ -46,15 +45,17 @@ int main(void)
   motor_set_ilim(150);
   motor_set_speed(0);
 
+  RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
+  GPIOB->MODER = GPIO_MODER_MODER2_0;
+
   while (1)
   {
-    status_red();
+   GPIOB->ODR ^= GPIO_ODR_2;
 //    getSensorData();
 //    getBatteryVoltage();
 //    updateSteering();
 //    updateSpeed();
 //    sendDiagnostics();
-    status_grn();
     enter_sleep();
   }
 }
@@ -65,34 +66,55 @@ int main(void)
   */
 void sysclk_cfg(void)
 {
-  // HSI Configuration
+/*-------------------------- HSI/HSI14 Configuration -----------------------*/
   RCC->CR |= RCC_CR_HSION;
-  while ((RCC->CR & RCC_CR_HSIRDY) == 0) {}  // Wait for HSI
+
+  while ((RCC->CR & RCC_CR_HSIRDY) == 0) {}
+
+  // Clock calibration
   RCC->CR &= ~RCC_CR_HSITRIM;
   RCC->CR |= 16u << RCC_CR_HSITRIM_Pos;
+
   RCC->CR2 |= RCC_CR2_HSI14DIS;
   RCC->CR2 |= RCC_CR2_HSI14ON;
 
-  // HSI14 Configuration
-  while ((RCC->CR2 & RCC_CR2_HSI14RDY) == 0) {}  // Wait for HSI14
+  // Wait for HSI14
+  while ((RCC->CR2 & RCC_CR2_HSI14RDY) == 0) {}
+
+  // Clock calibration
   RCC->CR2 &= ~RCC_CR2_HSI14TRIM;
   RCC->CR2 |= 16u << RCC_CR2_HSI14TRIM_Pos;
 
-  // PLL Configuration
+/*-------------------------------- PLL Configuration -----------------------*/
   RCC->CR &= ~RCC_CR_PLLON;
-  while ((RCC->CR & RCC_CR_PLLRDY) != 0) {}  // Wait for PLL
+
+  // Wait for PLL
+  while ((RCC->CR & RCC_CR_PLLRDY) != 0) {}
+
   RCC->CFGR = RCC_CFGR_PLLMUL6 |
                RCC_CFGR_PLLSRC_HSI_DIV2;
   RCC->CFGR2 = RCC_CFGR2_PREDIV_1;
-  RCC->CR |= RCC_CR_PLLON;
-  while ((RCC->CR & RCC_CR_PLLRDY) == 0) {}  // Wait for PLL
 
-  // CPU/Peripheral Configuration
+  RCC->CR |= RCC_CR_PLLON;
+
+  // Wait for PLL
+  while ((RCC->CR & RCC_CR_PLLRDY) == 0) {}
+
+/*--------------------- CPU/Peripheral Configuration -----------------------*/
   RCC->CFGR |= RCC_CFGR_HPRE_DIV1;
   RCC->CFGR |= RCC_CFGR_SW_PLL;
-  while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL) {}  // Wait for PLL
+
+  // Wait for PLL
+  while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL) {}
+
   RCC->CFGR |= RCC_CFGR_PPRE_DIV1;
 }
+
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
+void Error_Handler(void) {}
 
 /**
   * @brief  Set up main loop timer, resonsible for the loop interval.
@@ -109,19 +131,6 @@ void setup_main(void) {
 
   NVIC_EnableIRQ(TIM16_IRQn);
   NVIC_SetPriority(TIM16_IRQn,2);
-}
-
-void setup_status_led(void) {
-  RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
-  GPIOA->MODER = GPIO_MODER_MODER11_0;
-}
-
-void status_red(void) {
-  GPIOA->ODR |= GPIO_ODR_11;
-}
-
-void status_grn(void) {
-  GPIOA->ODR &= ~GPIO_ODR_11;
 }
 
 /**
