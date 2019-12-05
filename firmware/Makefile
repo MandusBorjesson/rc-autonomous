@@ -40,6 +40,7 @@ src/main.c \
 src/buzzer.c \
 src/servo.c \
 src/motor.c \
+src/uart.c \
 src/stm32f0xx_it.c \
 src/system_stm32f0xx.c \
 
