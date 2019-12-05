@@ -4,6 +4,9 @@
 
 void servo_init(void) {
   RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
+  uint32_t tmp =   RCC->AHBENR & RCC_AHBENR_GPIOBEN;
+  (void)(tmp);
+
   SERVO_IOBANK->MODER = GPIO_MODER_MODER0_1; // Alternate function
   SERVO_IOBANK->OSPEEDR = GPIO_OSPEEDER_OSPEEDR0_0 |
                            GPIO_OSPEEDER_OSPEEDR0_1;
