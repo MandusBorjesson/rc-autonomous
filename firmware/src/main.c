@@ -5,6 +5,7 @@
 // #include "buzzer.h"
 #include "servo.h"
 #include "motor.h"
+#include "uart.h"
 
 //#include "stm32f051x8.h"
 
@@ -38,8 +39,8 @@ int main(void)
 /* MCU Configuration--------------------------------------------------------*/
   sysclk_cfg();
   setup_main();
-  setup_status_led();
   motor_init();
+  uart_init();
 //  buzzer_init();
 //  servo_init();
 
@@ -48,13 +49,14 @@ int main(void)
 
   while (1)
   {
-    status_red();
+    static char i = 0;
+    uint8_t data[4] = {i++};
+    uart_send(data, sizeof(data));
 //    getSensorData();
 //    getBatteryVoltage();
 //    updateSteering();
 //    updateSpeed();
 //    sendDiagnostics();
-    status_grn();
     enter_sleep();
   }
 }
@@ -109,19 +111,6 @@ void setup_main(void) {
 
   NVIC_EnableIRQ(TIM16_IRQn);
   NVIC_SetPriority(TIM16_IRQn,2);
-}
-
-void setup_status_led(void) {
-  RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
-  GPIOA->MODER = GPIO_MODER_MODER11_0;
-}
-
-void status_red(void) {
-  GPIOA->ODR |= GPIO_ODR_11;
-}
-
-void status_grn(void) {
-  GPIOA->ODR &= ~GPIO_ODR_11;
 }
 
 /**

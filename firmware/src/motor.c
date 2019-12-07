@@ -10,7 +10,10 @@ void motor_init(void) {
 }
 
 void motor_init_pins(void) {
-RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+  RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+  uint32_t tmp =   RCC->AHBENR & RCC_AHBENR_GPIOAEN;
+  (void)(tmp);
+
   MOTOR_IOBANK->MODER |= GPIO_MODER_MODER6_1 |
                          GPIO_MODER_MODER7_1; // Alternate function
   MOTOR_IOBANK->AFR[0] |= (0x1 << GPIO_AFRL_AFRL6_Pos) |
