@@ -1,11 +1,14 @@
 /* Includes ------------------------------------------------------------------*/
 #include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
 
 #include "main.h"
 // #include "buzzer.h"
 #include "servo.h"
 #include "motor.h"
 #include "uart.h"
+#include "distance_sensor.h"
 
 //#include "stm32f051x8.h"
 
@@ -20,13 +23,15 @@ typedef struct {
 
 typedef struct {
   /* Outputs */
-  int s_p;
-  int s_i;
-  int s_d;
-  int servo_angle;
-  int motor_speed;
-  int sensor_distance[3];
-  double battery_voltage;
+  uint8_t key1;
+  uint8_t key2;
+  uint8_t s_p;
+  uint8_t s_i;
+  uint8_t s_d;
+  uint8_t servo_angle;
+  uint8_t motor_speed;
+  uint8_t sensor_distance[SENSOR_COUNT];
+  uint8_t battery_voltage;
 } car_diag;
 
 /**
@@ -36,27 +41,44 @@ typedef struct {
 int main(void)
 {
 
-/* MCU Configuration--------------------------------------------------------*/
+  car_diag diagnostics;
+  uint8_t send_buf[sizeof(car_diag)];
+
+  diagnostics.key1 = 0xAA;
+  diagnostics.key2 = 0xBB;
+
+  /* MCU Configuration--------------------------------------------------------*/
   sysclk_cfg();
   setup_main();
   motor_init();
   uart_init();
 //  buzzer_init();
 //  servo_init();
+  if (sensor_init() != ADC_STAT_OK) {
+    while(1); // Lock up
+  }
 
   motor_set_ilim(150);
   motor_set_speed(0);
 
   while (1)
   {
-    static char i = 0;
-    uint8_t data[4] = {i++};
-    uart_send(data, sizeof(data));
-//    getSensorData();
-//    getBatteryVoltage();
+    diagnostics.s_p = 0;
+    diagnostics.s_i = 1;
+    diagnostics.s_d = 2;
+    diagnostics.servo_angle = 3;
+    diagnostics.motor_speed = 4;
+
+    adc_sample_channels();
+    sensor_get_values(diagnostics.sensor_distance);
+    diagnostics.battery_voltage = battery_get_voltage();
+
 //    updateSteering();
 //    updateSpeed();
-//    sendDiagnostics();
+
+    memcpy(&send_buf, &diagnostics, sizeof(send_buf));
+    uart_send(send_buf, sizeof(send_buf));
+
     enter_sleep();
   }
 }
