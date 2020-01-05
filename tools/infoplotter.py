@@ -11,10 +11,13 @@ signals = [
     ['d1', col.Wht],
     ['d2', col.Wht],
     ['d3', col.Wht],
-    ['vbat', col.Blk],
+    ['vbat', col.Yel],
 ]
 
-package_size = 2
+# Package size, not including key
+package_size = 9
+key_MSB = b'\xaa'
+key_LSB = b'\xbb'
 
 # main() function
 def main():
@@ -45,6 +48,16 @@ def main():
 
     # Draw data
     outBuf = [' ']*256
+
+    # Key checking
+    while s.read(1) != key_MSB:
+      print("First key stage failed: ")
+      pass
+
+    if s.read(1) != key_LSB:
+      print("Second key stage failed")
+      continue
+
     data = s.read(package_size)
 
     for i, x in enumerate(data):
