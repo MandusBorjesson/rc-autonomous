@@ -1,10 +1,3 @@
-"""
-ldr.py
-Display analog data from Arduino using Python (matplotlib)
-Author: Mahesh Venkitachalam
-Website: electronut.in
-"""
-
 import serial, sys, argparse
 from time import sleep
 import colors as col
@@ -21,6 +14,7 @@ signals = [
     ['vbat', col.Blk],
 ]
 
+package_size = 2
 
 # main() function
 def main():
@@ -48,23 +42,27 @@ def main():
 
 
   while 1:
-    outBuf = [' ']*256
 
-    data = s.read(4)
+    # Draw data
+    outBuf = [' ']*256
+    data = s.read(package_size)
 
     for i, x in enumerate(data):
       outBuf[x] = signals[i][1] + 'O' + col.Off
 
-
-#    print('\r' + '|' + ''.join(outBuf) + '|')
     sys.stdout.write('|' + ''.join(outBuf) + '|\n')
     sys.stdout.flush()
 
-    sys.stdout.write('| HEJ!\r')
+    # Draw legends
+    outBuf = [' ']*(256+20)
+
+    for i, x in enumerate(data):
+      for j, c in enumerate(signals[i][0]):
+        outBuf[x+j] = signals[i][1] + c + col.Off
+
+    sys.stdout.write(' ' + ''.join(outBuf) + '\r')
 
 
-
-#sys.stdout.write('\r' + '|%s%s%s%s| %d%%' % (unitColor, '\033[7m' + ' '*incre + ' \033[27m', endColor, ' '*(50-incre), 2*incre)) if i != count — 1 else sys.stdout.write('\r' + '|%s%s%s| %d%%' % (unitColor, '\033[7m' + ' '*20 + 'COMPLETE!' + ' '*21 + ' \033[27m’, endColor, 100))
 # call main
 if __name__ == '__main__':
   main()
