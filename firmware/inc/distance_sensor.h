@@ -14,7 +14,6 @@
 #define ADC_VBAT_OFFS 6
 #define SENSOR_DMA DMA1_Channel1
 #define SENSOR_IOBANK GPIOA
-#define SENSOR_COUNT 3
 #define TIMEOUT_MAX 1000000
 
 enum adc_stat {
@@ -30,7 +29,7 @@ uint8_t adc_buf[10];
 
 int sensor_init(void);
 int adc_sample_channels(void);
-void sensor_get_values(uint8_t *buf);
+uint8_t sensor_get_value(uint8_t off);
 uint8_t battery_get_voltage(void);
 
 #ifdef __cplusplus

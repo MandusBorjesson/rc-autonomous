@@ -36,14 +36,15 @@ BUILD_DIR = build
 ######################################
 # C sources
 C_SOURCES =  \
-src/main.c \
-src/buzzer.c \
-src/servo.c \
-src/motor.c \
-src/uart.c \
 src/distance_sensor.c \
+src/buzzer.c \
+src/main.c \
+src/motor.c \
+src/pid.c \
+src/servo.c \
 src/stm32f0xx_it.c \
 src/system_stm32f0xx.c \
+src/uart.c \
 
 # ASM sources
 ASM_SOURCES =  \
