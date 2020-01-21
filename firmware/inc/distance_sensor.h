@@ -8,7 +8,7 @@
 /* Includes ------------------------------------------------------------------*/
 
 #define SENSOR_ADC ADC1
-#define ADC_SENS_FORW_OFFS 0
+#define ADC_SENS_FORW_OFFS 1
 #define ADC_SENS_RGHT_OFFS 1
 #define ADC_SENS_LEFT_OFFS 2
 #define ADC_VBAT_OFFS 6
