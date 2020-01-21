@@ -14,7 +14,7 @@ int8_t calc_p(int8_t err, uint8_t k_p);
 int8_t calc_i(int8_t err, uint8_t k_i);
 int8_t calc_d(int8_t err, uint8_t k_d);
 
-void calc_y(car_cfg* cfg, car_diag* diag);
+int8_t calc_y(car_cfg* cfg, car_diag* diag);
 
 #ifdef __cplusplus
 }

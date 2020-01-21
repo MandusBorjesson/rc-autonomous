@@ -7,13 +7,15 @@
 #endif
 
 /* Includes ------------------------------------------------------------------*/
+#include <stdint.h>
 
-#define SERVO_TIM TIM1
+#define SERVO_TIM TIM14
 #define SERVO_IOBANK GPIOB
+#define SERVO_CENTER 749
 
 void servo_init(void);
 
-void servo_set_angle(unsigned char angle);
+void servo_set_angle(int8_t angle);
 
 #ifdef __cplusplus
 }

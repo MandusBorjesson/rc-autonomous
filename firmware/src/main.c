@@ -3,15 +3,12 @@
 #include <stdint.h>
 #include <string.h>
 
-// #include "buzzer.h"
 #include "distance_sensor.h"
 #include "main.h"
 #include "motor.h"
 #include "pid.h"
 #include "servo.h"
 #include "uart.h"
-
-//#include "stm32f051x8.h"
 
 /**
   * @brief  The application entry point.
@@ -38,7 +35,7 @@ int main(void)
   cfg->k_i = 0;
   cfg->k_d = 0;
   cfg->max_spd = 140;
-  cfg->trg_dist = 50;
+  cfg->trg_dist = 100;
 
   /* Start delay */
   for (unsigned long int i = 0; i < 1000000; i++) {
@@ -51,12 +48,12 @@ int main(void)
   motor_init();
   uart_init();
 //  buzzer_init();
-//  servo_init();
+  servo_init();
   if (sensor_init() != ADC_STAT_OK) {
     while(1); // Lock up
   }
 
-  motor_set_ilim(200);
+  motor_set_ilim(255);
   motor_set_speed(0);
 
   while (1)
@@ -64,13 +61,9 @@ int main(void)
     adc_sample_channels();
     diag->sensor_distance = sensor_get_value(ADC_SENS_FORW_OFFS);
 
-    // diag->sensor_distance[ADC_SENS_RGHT_OFFS] = 0;
-    // diag->sensor_distance[ADC_SENS_LEFT_OFFS] = 0;
+    diag->servo_angle = calc_y(cfg, diag);
 
-    calc_y(cfg, diag);
-//    updateSteering();
-    motor_set_speed(diag->motor_speed);
-
+    servo_set_angle(diag->servo_angle);
 
     memcpy(&send_buf, diag, sizeof(send_buf));
     uart_send(send_buf, sizeof(send_buf));

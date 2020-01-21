@@ -14,7 +14,7 @@ int8_t calc_d(int8_t err, uint8_t k_d) {
   return 0;
 }
 
-void calc_y(car_cfg* cfg, car_diag* diag) {
+int8_t calc_y(car_cfg* cfg, car_diag* diag) {
   int8_t err = (diag->sensor_distance - cfg->trg_dist) / 2;
   diag->s_p = calc_p(err, cfg->k_p);
   diag->s_i = calc_i(err, cfg->k_i);
@@ -26,6 +26,6 @@ void calc_y(car_cfg* cfg, car_diag* diag) {
     sum = (sum > 0) ? cfg->max_spd : -cfg->max_spd;
   }
 
-  diag->motor_speed = sum;
+  return sum;
 }
 

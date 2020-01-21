@@ -37,7 +37,6 @@ BUILD_DIR = build
 # C sources
 C_SOURCES =  \
 src/distance_sensor.c \
-src/buzzer.c \
 src/main.c \
 src/motor.c \
 src/pid.c \
