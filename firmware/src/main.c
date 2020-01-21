@@ -3,36 +3,15 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "main.h"
 // #include "buzzer.h"
-#include "servo.h"
-#include "motor.h"
-#include "uart.h"
 #include "distance_sensor.h"
+#include "main.h"
+#include "motor.h"
+#include "pid.h"
+#include "servo.h"
+#include "uart.h"
 
 //#include "stm32f051x8.h"
-
-typedef struct {
-  /* Inputs */
-  int k_p;
-  int k_i;
-  int k_d;
-  int k_p_speed;
-  int max_speed;
-} car_settings;
-
-typedef struct {
-  /* Outputs */
-  uint8_t key1;
-  uint8_t key2;
-  uint8_t s_p;
-  uint8_t s_i;
-  uint8_t s_d;
-  uint8_t servo_angle;
-  uint8_t motor_speed;
-  uint8_t sensor_distance[SENSOR_COUNT];
-  uint8_t battery_voltage;
-} car_diag;
 
 /**
   * @brief  The application entry point.
@@ -42,12 +21,31 @@ int main(void)
 {
 
   car_diag diagnostics;
+  car_diag* diag = &diagnostics;
+
+  car_cfg config;
+  car_cfg* cfg = &config;
+
   uint8_t send_buf[sizeof(car_diag)];
 
-  diagnostics.key1 = 0xAA;
-  diagnostics.key2 = 0xBB;
+  diag->key1 = 0xAA;
+  diag->key2 = 0xBB;
+  diag->servo_angle = 0;
+  diag->motor_speed = 0;
+  diag->battery_voltage = 0;
 
-  /* MCU Configuration--------------------------------------------------------*/
+  cfg->k_p = 255;
+  cfg->k_i = 0;
+  cfg->k_d = 0;
+  cfg->max_spd = 140;
+  cfg->trg_dist = 50;
+
+  /* Start delay */
+  for (unsigned long int i = 0; i < 1000000; i++) {
+    __NOP();
+  }
+
+  /* MCU Configuration */
   sysclk_cfg();
   setup_main();
   motor_init();
@@ -58,25 +56,23 @@ int main(void)
     while(1); // Lock up
   }
 
-  motor_set_ilim(150);
+  motor_set_ilim(200);
   motor_set_speed(0);
 
   while (1)
   {
-    diagnostics.s_p = 0;
-    diagnostics.s_i = 1;
-    diagnostics.s_d = 2;
-    diagnostics.servo_angle = 3;
-    diagnostics.motor_speed = 4;
-
     adc_sample_channels();
-    sensor_get_values(diagnostics.sensor_distance);
-    diagnostics.battery_voltage = battery_get_voltage();
+    diag->sensor_distance = sensor_get_value(ADC_SENS_FORW_OFFS);
 
+    // diag->sensor_distance[ADC_SENS_RGHT_OFFS] = 0;
+    // diag->sensor_distance[ADC_SENS_LEFT_OFFS] = 0;
+
+    calc_y(cfg, diag);
 //    updateSteering();
-//    updateSpeed();
+    motor_set_speed(diag->motor_speed);
 
-    memcpy(&send_buf, &diagnostics, sizeof(send_buf));
+
+    memcpy(&send_buf, diag, sizeof(send_buf));
     uart_send(send_buf, sizeof(send_buf));
 
     enter_sleep();

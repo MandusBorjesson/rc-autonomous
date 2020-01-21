@@ -8,14 +8,14 @@ signals = [
     ['s_d', col.Blu],
     ['servo', col.BIPur],
     ['motor', col.Cya],
-    ['d1', col.Wht],
-    ['d2', col.Wht],
-    ['d3', col.Wht],
+    ['dist', col.Wht],
+#    ['d2', col.Wht],
+#    ['d3', col.Wht],
     ['vbat', col.Yel],
 ]
 
 # Package size, not including key
-package_size = 9
+package_size = 7
 key_MSB = b'\xaa'
 key_LSB = b'\xbb'
 

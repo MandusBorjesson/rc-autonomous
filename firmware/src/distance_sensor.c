@@ -117,10 +117,8 @@ int adc_sample_channels(void) {
   return ADC_STAT_OK;
 }
 
-void sensor_get_values(uint8_t *buf) {
-  buf[0] = val_2_dist[adc_buf[ADC_SENS_LEFT_OFFS]];
-  buf[1] = val_2_dist[adc_buf[ADC_SENS_FORW_OFFS]];
-  buf[2] = val_2_dist[adc_buf[ADC_SENS_RGHT_OFFS]];
+uint8_t sensor_get_value(uint8_t off) {
+  return val_2_dist[adc_buf[off]];
 }
 
 uint8_t battery_get_voltage(void) {
