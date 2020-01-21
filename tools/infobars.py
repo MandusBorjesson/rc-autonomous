@@ -23,19 +23,23 @@ key_LSB = b'\xbb'
 
 def makeSlider(val, type, max_sz):
       slider = [' ']*(max_sz)
+      zero_position = 0
 
       if type is 's8':
         val = val - 256 if val > 127 else val
         index = ((val + 128)*max_sz)//256
-        slider[max_sz//2] = '0'
+        zero_position = max_sz//2
       elif type is 'u8':
         index = (val*max_sz)//256
-        slider[0] = '0'
       else:
         index = 0
         val = 0
 
+      for i in range(min(index, zero_position), max(index, zero_position)):
+        slider[i] = "-"
+
       slider[index] = "#"
+      slider[zero_position] = "0"
 
       return [''.join(slider), val]
 
