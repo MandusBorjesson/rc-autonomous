@@ -20,7 +20,8 @@ void uart_init(void) {
   UART_USART->CR1 = USART_CR1_TE |
                     USART_CR1_RE |
                     USART_CR1_UE |
-                    USART_CR1_UESM;
+                    USART_CR1_UESM |
+                    USART_CR1_RXNEIE;
 
   /* GPIO Setup */
   RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
@@ -47,6 +48,9 @@ void uart_init(void) {
 
   UART_IOBANK->PUPDR &= ~( GPIO_PUPDR_PUPDR9_Msk |
                            GPIO_PUPDR_PUPDR10_Msk );
+
+  NVIC_EnableIRQ(USART1_IRQn);
+  NVIC_SetPriority(USART1_IRQn,2);
 }
 
 void uart_send(uint8_t *data, uint16_t size) {
@@ -63,3 +67,4 @@ void uart_send(uint8_t *data, uint16_t size) {
   }
   while((UART_USART->ISR & USART_ISR_TC) != USART_ISR_TC) {}
 }
+

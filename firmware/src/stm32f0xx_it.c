@@ -1,6 +1,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "uart.h"
 #include "stm32f0xx_it.h"
+#include "stm32f0xx.h"
 
 /******************************************************************************/
 /*           Cortex-M0 Processor Interruption and Exception Handlers          */ 
@@ -44,6 +46,28 @@ void SysTick_Handler(void) {}
 void TIM16_IRQHandler(void) {
   TIM16->SR &= ~TIM_SR_UIF; // Clear interrupt
   enter_run();
+}
+
+void USART1_IRQHandler(void) {
+
+  char tmp = (char)USART1->RDR;
+  USART1->RQR |= USART_RQR_RXFRQ;
+
+  if (rx_buf->counter + 1 >= RX_BUF_SZ) {
+    rx_buf->state = BUF_FULL;
+    return;
+  }
+
+  if (tmp == 0) {
+    rx_buf->state = CMD_RDY;
+    return;
+  }
+
+  if (rx_buf->state == NO_CMD) {
+    rx_buf->buf[rx_buf->counter] = tmp;
+  }
+
+  rx_buf->counter++;
 }
 
 #ifdef __cplusplus
