@@ -11,8 +11,10 @@ signals = [
     ['vbat', col.Yel, 'u8'],
 ]
 
+symbol_list = ' _.,;:-+*/=()[]'
+
 # Package size, not including key
-package_size = 7
+package_size = len(signals)
 
 # Width of name and value fields
 name_width = 8
@@ -20,6 +22,13 @@ val_width = 4
 
 key_MSB = b'\xaa'
 key_LSB = b'\xbb'
+
+def send_command(port, command):
+  command = command.replace(' ', '')
+  command = command.split(';')
+
+  for com in command:
+    port.write(com.encode('utf-8'))
 
 def makeSlider(val, type, max_sz):
       slider = [' ']*(max_sz)
@@ -36,16 +45,16 @@ def makeSlider(val, type, max_sz):
         val = 0
 
       for i in range(min(index, zero_position), max(index, zero_position)):
-        slider[i] = "-"
+        slider[i] = '-'
 
-      slider[index] = "#"
-      slider[zero_position] = "0"
+      slider[index] = '#'
+      slider[zero_position] = '0'
 
       return [''.join(slider), val]
 
 def draw_bars(stdscr):
   # create parser
-  parser = argparse.ArgumentParser(description="Command line serial plotter")
+  parser = argparse.ArgumentParser(description='Command line serial plotter')
 
   # add expected arguments
   parser.add_argument('--port', dest='port', required=True)
@@ -55,6 +64,11 @@ def draw_bars(stdscr):
 
   s = serial.Serial(args.port, 9600, timeout=1)
 
+  cmd_hist = ['', '']
+  cmd = ''
+  cmd_cntr = 0
+
+  stdscr.nodelay(True)
   stdscr.clear()
   stdscr.refresh()
 
@@ -82,7 +96,32 @@ def draw_bars(stdscr):
       row = "| {} |{}| {}\n".format(name, slider, str(val).rjust(val_width))
       stdscr.addstr(i, 0, row)
 
+    stdscr.addstr(package_size + 1, 0, cmd)
     stdscr.refresh()
+
+    # Keypress handling
+    try:
+      key = stdscr.getkey()
+      if key in ('KEY_BACKSPACE', '\b', '\x7f'):
+        cmd = cmd[:-1]
+      elif key in ('KEY_ENTER', '\x0a'):
+        send_command(s, cmd)
+        if cmd_hist[1] is not cmd:
+          cmd_hist.insert(1, cmd)
+        cmd_cntr = 0
+        cmd = ""
+      elif key == 'KEY_UP':
+        if cmd_cntr < len(cmd_hist):
+          cmd_cntr = cmd_cntr + 1
+        cmd = cmd_hist[cmd_cntr]
+      elif key == 'KEY_DOWN':
+        if cmd_cntr > 1:
+          cmd_cntr = cmd_cntr - 1
+        cmd = cmd_hist[cmd_cntr]
+      elif key.isalnum() or key in symbol_list:
+        cmd = cmd + key
+    except:
+      pass
 
 # main() function
 def main():
