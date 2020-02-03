@@ -8,7 +8,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
-#include "main.h"
+#include "types.h"
 
 int8_t calc_p(int8_t err, uint8_t k_p);
 int8_t calc_i(int8_t err, uint8_t k_i);

@@ -16,12 +16,9 @@
   */
 int main(void)
 {
-
-  car_diag diagnostics;
-  car_diag* diag = &diagnostics;
-
-  car_cfg config;
-  car_cfg* cfg = &config;
+  diag = &diagnostics;
+  cfg = &config;
+  rx_buf = &uart_buffer;
 
   uint8_t send_buf[sizeof(car_diag)];
 
