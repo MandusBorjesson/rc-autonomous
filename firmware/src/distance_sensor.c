@@ -1,4 +1,3 @@
-/* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
 #include "distance_sensor.h"
 #include "stm32f0xx.h"

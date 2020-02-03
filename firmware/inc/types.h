@@ -1,4 +1,3 @@
-/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __TYPES_H
 #define __TYPES_H
 
@@ -6,7 +5,6 @@
 extern "C" {
 #endif
 
-/* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
 
 #define RX_BUF_SZ 16

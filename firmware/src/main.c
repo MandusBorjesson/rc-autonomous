@@ -1,4 +1,3 @@
-/* Includes ------------------------------------------------------------------*/
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
@@ -45,7 +44,6 @@ int main(void)
   setup_main();
   motor_init();
   uart_init();
-//  buzzer_init();
   servo_init();
   if (sensor_init() != ADC_STAT_OK) {
     while(1); // Lock up
@@ -67,7 +65,7 @@ int main(void)
   while (1)
   {
     adc_sample_channels();
-    diag->sensor_distance = sensor_get_value(ADC_SENS_FORW_OFFS);
+    diag->sensor_distance = sensor_get_value(ADC_SENS_OFFS);
 
     diag->servo_angle = calc_y(cfg, diag);
 

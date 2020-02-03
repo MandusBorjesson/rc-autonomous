@@ -1,9 +1,7 @@
-/* Includes ------------------------------------------------------------------*/
 #include <stdlib.h>
 #include <string.h>
 #include "uart.h"
 #include "stm32f0xx.h"
-
 
 void uart_init(void) {
   uint32_t tmp;
@@ -56,9 +54,6 @@ void uart_init(void) {
 }
 
 void uart_send(uint8_t *data, uint16_t size) {
-  // UART_USART->TDR = 0x35;
-  // while(!(UART_USART->ISR & USART_ISR_TXE)); // Wait for Empty
-
   uint16_t counter = size;
   while(counter > 0)
   {

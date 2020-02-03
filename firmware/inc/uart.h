@@ -1,12 +1,10 @@
-
-/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __uart_H
 #define __uart_H
+
 #ifdef __cplusplus
  extern "C" {
 #endif
 
-/* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
 #include "stm32f0xx.h"
 #include "types.h"
@@ -25,4 +23,5 @@ void uart_handle_cmd(uart_buf* pb, car_cfg* pc);
 #ifdef __cplusplus
 }
 #endif
+
 #endif /*__ __uart_H */

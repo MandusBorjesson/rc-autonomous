@@ -1,4 +1,3 @@
-/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __MAIN_H
 #define __MAIN_H
 
@@ -6,12 +5,9 @@
 extern "C" {
 #endif
 
-/* Includes ------------------------------------------------------------------*/
-#include <stdint.h>
 #include "stm32f0xx.h"
 #include "types.h"
 
-/* Private defines -----------------------------------------------------------*/
 #define LOOP_INTERVAL_MS 200
 #define MAIN_LOOP_TIMER TIM16
 #define SENSOR_COUNT 3

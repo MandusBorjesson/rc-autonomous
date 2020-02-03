@@ -1,4 +1,3 @@
-/* Includes ------------------------------------------------------------------*/
 #include "servo.h"
 #include "stm32f0xx.h"
 
@@ -22,7 +21,7 @@ void servo_init(void) {
   SERVO_TIM->CR1 |= TIM_CR1_ARPE;
   SERVO_TIM->EGR |= TIM_EGR_UG;
   SERVO_TIM->CR1 |= TIM_CR1_CEN;
-  }
+}
 
 void servo_set_angle(int8_t angle) {
   SERVO_TIM->CCR1 = 8192 - SERVO_CENTER - angle;

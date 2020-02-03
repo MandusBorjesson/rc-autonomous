@@ -49,7 +49,6 @@ void TIM16_IRQHandler(void) {
 }
 
 void USART1_IRQHandler(void) {
-
   char tmp = (char)USART1->RDR;
   USART1->RQR |= USART_RQR_RXFRQ;
 
