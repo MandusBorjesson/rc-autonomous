@@ -1,4 +1,4 @@
-import serial, sys, argparse, curses
+import serial, sys, argparse, curses, time
 import colors as col
 
 signals = [
@@ -28,7 +28,8 @@ def send_command(port, command):
   command = command.split(';')
 
   for com in command:
-    port.write(com.encode('utf-8'))
+    port.write((com + '\x00').lower().encode('utf-8'))
+    time.sleep(0.1)
 
 def makeSlider(val, type, max_sz):
       slider = [' ']*(max_sz)

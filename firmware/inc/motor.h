@@ -1,12 +1,10 @@
-
-/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __motor_H
 #define __motor_H
+
 #ifdef __cplusplus
  extern "C" {
 #endif
 
-/* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
 
 #define MOTOR_DAC DAC
@@ -25,4 +23,5 @@ void motor_set_ilim(uint8_t ilim);
 #ifdef __cplusplus
 }
 #endif
+
 #endif /*__ __motor_H */

@@ -1,4 +1,3 @@
-/* Includes ------------------------------------------------------------------*/
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
@@ -16,12 +15,9 @@
   */
 int main(void)
 {
-
-  car_diag diagnostics;
-  car_diag* diag = &diagnostics;
-
-  car_cfg config;
-  car_cfg* cfg = &config;
+  diag = &diagnostics;
+  cfg = &config;
+  rx_buf = &uart_buffer;
 
   uint8_t send_buf[sizeof(car_diag)];
 
@@ -36,6 +32,7 @@ int main(void)
   cfg->k_d = 0;
   cfg->max_spd = 140;
   cfg->trg_dist = 100;
+  cfg->car_state = WAIT;
 
   /* Start delay */
   for (unsigned long int i = 0; i < 1000000; i++) {
@@ -47,7 +44,6 @@ int main(void)
   setup_main();
   motor_init();
   uart_init();
-//  buzzer_init();
   servo_init();
   if (sensor_init() != ADC_STAT_OK) {
     while(1); // Lock up
@@ -56,14 +52,34 @@ int main(void)
   motor_set_ilim(255);
   motor_set_speed(0);
 
+  while (cfg->car_state != RUN /* And start pin is not active */) {
+    memcpy(&send_buf, diag, sizeof(send_buf));
+    uart_send(send_buf, sizeof(send_buf));
+    if (rx_buf->state != NO_CMD){
+      uart_handle_cmd(rx_buf, cfg);
+    }
+  }
+
+  cfg->car_state = RUN;
+
   while (1)
   {
     adc_sample_channels();
-    diag->sensor_distance = sensor_get_value(ADC_SENS_FORW_OFFS);
+    diag->sensor_distance = sensor_get_value(ADC_SENS_OFFS);
 
     diag->servo_angle = calc_y(cfg, diag);
 
-    servo_set_angle(diag->servo_angle);
+    if (rx_buf->state != NO_CMD){
+      uart_handle_cmd(rx_buf, cfg);
+    }
+
+    if (cfg->car_state == RUN) {
+      motor_set_speed(cfg->max_spd);
+      servo_set_angle(diag->servo_angle);
+    } else {
+      motor_set_speed(0);
+      servo_set_angle(0);
+   }
 
     memcpy(&send_buf, diag, sizeof(send_buf));
     uart_send(send_buf, sizeof(send_buf));

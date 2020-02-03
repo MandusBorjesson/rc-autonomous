@@ -1,4 +1,3 @@
-/* Includes ------------------------------------------------------------------*/
 #include <stdlib.h>
 #include "motor.h"
 #include "stm32f0xx.h"
@@ -48,7 +47,6 @@ void motor_init_ilim(void) {
   DAC->CR |= DAC_CR_EN1;
   DAC->DHR8R1 = 0;
 }
-
 
 void motor_set_speed(int8_t speed) {
   uint32_t val = abs(speed);

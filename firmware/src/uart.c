@@ -1,7 +1,7 @@
-/* Includes ------------------------------------------------------------------*/
+#include <stdlib.h>
+#include <string.h>
 #include "uart.h"
 #include "stm32f0xx.h"
-
 
 void uart_init(void) {
   uint32_t tmp;
@@ -20,7 +20,8 @@ void uart_init(void) {
   UART_USART->CR1 = USART_CR1_TE |
                     USART_CR1_RE |
                     USART_CR1_UE |
-                    USART_CR1_UESM;
+                    USART_CR1_UESM |
+                    USART_CR1_RXNEIE;
 
   /* GPIO Setup */
   RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
@@ -47,12 +48,12 @@ void uart_init(void) {
 
   UART_IOBANK->PUPDR &= ~( GPIO_PUPDR_PUPDR9_Msk |
                            GPIO_PUPDR_PUPDR10_Msk );
+
+  NVIC_EnableIRQ(USART1_IRQn);
+  NVIC_SetPriority(USART1_IRQn,2);
 }
 
 void uart_send(uint8_t *data, uint16_t size) {
-  // UART_USART->TDR = 0x35;
-  // while(!(UART_USART->ISR & USART_ISR_TXE)); // Wait for Empty
-
   uint16_t counter = size;
   while(counter > 0)
   {
@@ -62,4 +63,44 @@ void uart_send(uint8_t *data, uint16_t size) {
     UART_USART->TDR = (*data++ & (uint8_t)0xFFU);
   }
   while((UART_USART->ISR & USART_ISR_TC) != USART_ISR_TC) {}
+}
+
+void uart_handle_cmd(uart_buf* pb, car_cfg* pc) {
+  char cmd[RX_BUF_SZ] = {0};
+  int val = 0;
+  char *off;
+
+  if (pb->state == BUF_FULL) {
+    memset(pb->buf, 0, RX_BUF_SZ);
+    pb->counter = 0;
+    pb->state = NO_CMD;
+  }
+
+  off = strchr(pb->buf,'=');
+
+  if (off != NULL) {
+    memcpy(cmd, pb->buf, off - pb->buf);
+    val = atoi(off+1);
+  } else {
+    memcpy(cmd, pb->buf, RX_BUF_SZ);
+  }
+
+  if (strcmp(cmd, "start") == 0)
+        pc->car_state = RUN;
+  else if (strcmp(cmd, "stop") == 0)
+        pc->car_state = STOP;
+  else if (strcmp(cmd, "k_p") == 0)
+        pc->k_p = val;
+  else if (strcmp(cmd, "k_i") == 0)
+        pc->k_i = val;
+  else if (strcmp(cmd, "k_d") == 0)
+        pc->k_d = val;
+  else if (strcmp(cmd, "m_max") == 0)
+        pc->max_spd = val;
+  else if (strcmp(cmd, "d_targ") == 0)
+        pc->trg_dist = val;
+
+  memset(pb->buf, 0, RX_BUF_SZ);
+  pb->counter = 0;
+  pb->state = NO_CMD;
 }
