@@ -45,6 +45,7 @@ int main(void)
   motor_init();
   uart_init();
   servo_init();
+  startpin_init();
   if (sensor_init() != ADC_STAT_OK) {
     while(1); // Lock up
   }
@@ -63,9 +64,9 @@ int main(void)
       uart_handle_cmd(rx_buf, cfg);
     }
 
-    // if ( /* Start pin is active */ ) {
-    //   cfg->car_state = RUN;
-    // }
+    if ( startpin_get() == 0 ) {
+      cfg->car_state = RUN;
+    }
 
     if (cfg->car_state == RUN) {
       motor_set_speed(cfg->max_spd);
@@ -153,4 +154,15 @@ void enter_run(void)
 {
   SCB->SCR &= ~SCB_SCR_SLEEPONEXIT_Msk;
   __SEV();
+}
+
+void startpin_init(void) {
+  RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
+
+  // Enable pull-up on start pin
+  STARTPIN_IOBANK->PUPDR = 0b01 << GPIO_PUPDR_PUPDR2_Pos;
+}
+
+int startpin_get(void) {
+  return ( (STARTPIN_IOBANK->IDR & GPIO_IDR_2) > 0) ? 1 : 0;
 }

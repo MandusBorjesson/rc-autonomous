@@ -11,6 +11,7 @@ extern "C" {
 #define LOOP_INTERVAL_MS 200
 #define MAIN_LOOP_TIMER TIM16
 #define SENSOR_COUNT 3
+#define STARTPIN_IOBANK GPIOB
 
 car_diag diagnostics;
 car_diag* diag;
@@ -25,6 +26,8 @@ void sysclk_cfg(void);
 void setup_main(void);
 void enter_sleep(void);
 void enter_run(void);
+void startpin_init(void);
+int startpin_get(void);
 
 #ifdef __cplusplus
 }
