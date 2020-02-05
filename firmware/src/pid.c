@@ -2,16 +2,33 @@
 #include "pid.h"
 
 int8_t calc_p(int8_t err, uint8_t k_p) {
-  int out = err * (k_p/2);
-  return out / 128;
+  return (err * k_p) / 128;
 }
 
 int8_t calc_i(int8_t err, uint8_t k_i) {
-  return 0;
+  static int integral = 0;
+
+  integral += (err * k_i) / 128;
+
+  // Limit range
+  integral = (integral > 127) ? 127 : integral;
+  integral = (integral < -127) ? -127 : integral;
+
+  return integral;
 }
 
 int8_t calc_d(int8_t err, uint8_t k_d) {
-  return 0;
+  static int8_t old_err = 0;
+
+  int derivative = ( (err - old_err) * k_d ) / 128;
+
+  // Limit range
+  derivative = (derivative > 127) ? 127 : derivative;
+  derivative = (derivative < -127) ? -127 : derivative;
+
+  old_err = err;
+
+  return derivative;
 }
 
 int8_t calc_y(car_cfg* cfg, car_diag* diag) {
@@ -22,9 +39,9 @@ int8_t calc_y(car_cfg* cfg, car_diag* diag) {
 
   int sum = diag->s_p + diag->s_i + diag->s_d;
 
-  if (abs(sum) > cfg->max_spd) {
-    sum = (sum > 0) ? cfg->max_spd : -cfg->max_spd;
-  }
+  // Limit range
+  sum = (sum > 127) ? 127 : sum;
+  sum = (sum < -127) ? -127 : sum;
 
   return sum;
 }
