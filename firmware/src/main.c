@@ -52,16 +52,6 @@ int main(void)
   motor_set_ilim(255);
   motor_set_speed(0);
 
-  while (cfg->car_state != RUN /* And start pin is not active */) {
-    memcpy(&send_buf, diag, sizeof(send_buf));
-    uart_send(send_buf, sizeof(send_buf));
-    if (rx_buf->state != NO_CMD){
-      uart_handle_cmd(rx_buf, cfg);
-    }
-  }
-
-  cfg->car_state = RUN;
-
   while (1)
   {
     adc_sample_channels();
@@ -72,6 +62,10 @@ int main(void)
     if (rx_buf->state != NO_CMD){
       uart_handle_cmd(rx_buf, cfg);
     }
+
+    // if ( /* Start pin is active */ ) {
+    //   cfg->car_state = RUN;
+    // }
 
     if (cfg->car_state == RUN) {
       motor_set_speed(cfg->max_spd);

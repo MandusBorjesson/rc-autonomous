@@ -9,7 +9,7 @@
 
 #define SERVO_TIM TIM14
 #define SERVO_IOBANK GPIOB
-#define SERVO_CENTER 749
+#define SERVO_CENTER 700 // Greater -> left, Smaller -> right
 
 void servo_init(void);
 
