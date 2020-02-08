@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "distance_sensor.h"
+#include "flash.h"
 #include "main.h"
 #include "motor.h"
 #include "pid.h"
@@ -27,11 +28,14 @@ int main(void)
   diag->motor_speed = 0;
   diag->battery_voltage = 0;
 
-  cfg->k_p = 255;
-  cfg->k_i = 0;
-  cfg->k_d = 0;
-  cfg->max_spd = 140;
-  cfg->trg_dist = 100;
+  if ( flash_read(cfg, sizeof(car_cfg)) != 0 ) {
+    cfg->k_p = 200;
+    cfg->k_i = 0;
+    cfg->k_d = 0;
+    cfg->max_spd = 140;
+    cfg->trg_dist = 100;
+  }
+
   cfg->car_state = WAIT;
 
   /* Start delay */

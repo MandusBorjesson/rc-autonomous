@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "uart.h"
+#include "flash.h"
 #include "stm32f0xx.h"
 
 void uart_init(void) {
@@ -89,15 +90,17 @@ void uart_handle_cmd(uart_buf* pb, car_cfg* pc) {
         pc->car_state = RUN;
   else if (strcmp(cmd, "stop") == 0)
         pc->car_state = STOP;
+  else if (strcmp(cmd, "store_cfg") == 0)
+        flash_write(pc, sizeof(car_cfg));
   else if (strcmp(cmd, "k_p") == 0)
         pc->k_p = val;
   else if (strcmp(cmd, "k_i") == 0)
         pc->k_i = val;
   else if (strcmp(cmd, "k_d") == 0)
         pc->k_d = val;
-  else if (strcmp(cmd, "m_max") == 0)
+  else if (strcmp(cmd, "max_spd") == 0)
         pc->max_spd = val;
-  else if (strcmp(cmd, "d_targ") == 0)
+  else if (strcmp(cmd, "trg_dist") == 0)
         pc->trg_dist = val;
 
   memset(pb->buf, 0, RX_BUF_SZ);
