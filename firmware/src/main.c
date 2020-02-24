@@ -26,7 +26,6 @@ int main(void)
   diag->key2 = 0xBB;
   diag->servo_angle = 0;
   diag->motor_speed = 0;
-  diag->battery_voltage = 0;
 
   if ( flash_read(cfg, sizeof(car_cfg)) != 0 ) {
     cfg->k_p = 200;

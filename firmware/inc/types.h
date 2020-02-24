@@ -25,13 +25,13 @@ typedef struct car_diag {
   /* Outputs */
   uint8_t key1;
   uint8_t key2;
+  uint8_t sensor_distance;
+  int8_t err;
   int8_t s_p;
   int8_t s_i;
   int8_t s_d;
   int8_t servo_angle;
   int8_t motor_speed;
-  uint8_t sensor_distance;
-  uint8_t battery_voltage;
 } car_diag;
 
 typedef enum uart_state {NO_CMD, CMD_RDY, BUF_FULL} uart_state;

@@ -51,11 +51,11 @@ void motor_init_ilim(void) {
 void motor_set_speed(int8_t speed) {
   uint32_t val = abs(speed);
   if (speed <= 0) {
-    MOTOR_TIM->CCR1 = val;
-    MOTOR_TIM->CCR2 = 0;
-  } else {
     MOTOR_TIM->CCR1 = 0;
     MOTOR_TIM->CCR2 = val;
+  } else {
+    MOTOR_TIM->CCR1 = val;
+    MOTOR_TIM->CCR2 = 0;
   }
 }
 

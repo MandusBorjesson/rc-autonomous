@@ -2,13 +2,13 @@ import serial, sys, argparse, curses, time
 import colors as col
 
 signals = [
+    ['dist', col.Wht, 'u8'],
+    ['err', col.Yel, 's8'],
     ['s_p', col.Red, 's8'],
     ['s_i', col.Grn, 's8'],
     ['s_d', col.Blu, 's8'],
     ['servo', col.BIPur, 's8'],
     ['motor', col.Cya, 's8'],
-    ['dist', col.Wht, 'u8'],
-    ['vbat', col.Yel, 'u8'],
 ]
 
 symbol_list = ' _.,;:-+*/=()[]'
