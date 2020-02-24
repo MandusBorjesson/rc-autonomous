@@ -13,11 +13,11 @@ typedef enum car_status {WAIT, STOP, RUN} car_status;
 
 typedef struct car_cfg {
   /* Inputs */
-  uint8_t k_p;
-  uint8_t k_i;
-  uint8_t k_d;
+  uint16_t k_p;
+  uint16_t k_i;
+  uint16_t k_d;
   uint8_t max_spd;
-  uint8_t trg_dist;
+  uint16_t trg_dist;
   car_status car_state;
 } car_cfg;
 
@@ -25,11 +25,11 @@ typedef struct car_diag {
   /* Outputs */
   uint8_t key1;
   uint8_t key2;
-  uint8_t sensor_distance;
-  int8_t err;
-  int8_t s_p;
-  int8_t s_i;
-  int8_t s_d;
+  uint16_t sensor_distance;
+  int16_t err;
+  int16_t s_p;
+  int16_t s_i;
+  int16_t s_d;
   int8_t servo_angle;
   int8_t motor_speed;
 } car_diag;
