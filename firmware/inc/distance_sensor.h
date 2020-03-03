@@ -19,11 +19,11 @@ enum adc_stat {
   ADC_STAT_OK = 0
 };
 
-uint8_t adc_buf[10];
+uint16_t adc_buf[10];
 
 int sensor_init(void);
 int adc_sample_channels(void);
-uint8_t sensor_get_value(uint8_t off);
+uint16_t sensor_get_value(uint8_t off);
 
 #ifdef __cplusplus
 }
