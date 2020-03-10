@@ -1,20 +1,20 @@
 import serial, sys, argparse, curses, time
-import colors as col
+from collections import namedtuple
 
+signal = namedtuple('signal', ['name', 'type', 'offset'], defaults=('','',0))
 signals = [
-    ['dist', col.Wht, 'u8'],
-    ['err', col.Yel, 's8'],
-    ['s_p', col.Red, 's8'],
-    ['s_i', col.Grn, 's8'],
-    ['s_d', col.Blu, 's8'],
-    ['servo', col.BIPur, 's8'],
-    ['motor', col.Cya, 's8'],
+    signal('dist', 'u16'),
+    signal('err', 's16'),
+    signal('s_p', 's16'),
+    signal('s_i', 's16'),
+    signal('s_d', 's16'),
+    signal('servo', 's8'),
+    signal('motor', 's8'),
 ]
 
 symbol_list = ' _.,;:-+*/=()[]'
 
-# Package size, not including key
-package_size = len(signals)
+package_size = 0
 
 # Width of name and value fields
 name_width = 8
@@ -41,6 +41,12 @@ def makeSlider(val, type, max_sz):
         zero_position = max_sz//2
       elif type is 'u8':
         index = (val*max_sz)//256
+      elif type is 's16':
+        val = val - 65536 if val > 32767 else val
+        index = ((val + 32767)*max_sz)//65536
+        zero_position = max_sz//2
+      elif type is 'u16':
+        index = (val*max_sz)//65536
       else:
         index = 0
         val = 0
@@ -63,7 +69,7 @@ def draw_bars(stdscr):
   # parse args
   args = parser.parse_args()
 
-  s = serial.Serial(args.port, 9600, timeout=1)
+  ser = serial.Serial(args.port, 9600, timeout=1)
 
   cmd_hist = ['', '']
   cmd = ''
@@ -75,29 +81,36 @@ def draw_bars(stdscr):
 
   while 1:
     # Key checking
-    while s.read(1) != key_MSB:
+    while ser.read(1) != key_MSB:
       pass
 
-    if s.read(1) != key_LSB:
+    if ser.read(1) != key_LSB:
       continue
 
-    data = s.read(package_size)
+    data = ser.read(package_size)
 
     stdscr.clear()
     height, width = stdscr.getmaxyx()
 
     # Build up each row as a string
     # | Name     |       <-- Width -->         |  Val |
-    outBuf = ''
+    row_cntr = 0
 
-    for i, x in enumerate(data):
-      name = signals[i][0].ljust(name_width)
+    for sig in signals:
+      value = 0
+      if '16' in sig.type:
+        value = data[sig.offset+1] * 256 + data[sig.offset]
+      else:
+        value = data[sig.offset]
+
+      name = sig.name.ljust(name_width)
       slider_sz = width - name_width - val_width - 8
-      slider, val = makeSlider(x, signals[i][2], slider_sz)
+      slider, val = makeSlider(value, sig.type, slider_sz)
       row = "| {} |{}| {}\n".format(name, slider, str(val).rjust(val_width))
-      stdscr.addstr(i, 0, row)
+      stdscr.addstr(row_cntr, 0, row)
+      row_cntr = row_cntr + 1
 
-    stdscr.addstr(package_size + 1, 0, cmd)
+    stdscr.addstr(row_cntr, 0, cmd)
     stdscr.refresh()
 
     # Keypress handling
@@ -106,7 +119,7 @@ def draw_bars(stdscr):
       if key in ('KEY_BACKSPACE', '\b', '\x7f'):
         cmd = cmd[:-1]
       elif key in ('KEY_ENTER', '\x0a'):
-        send_command(s, cmd)
+        send_command(ser, cmd)
         if cmd_hist[1] is not cmd:
           cmd_hist.insert(1, cmd)
         cmd_cntr = 0
@@ -130,4 +143,15 @@ def main():
 
 # call main
 if __name__ == '__main__':
+  offs = 0
+  for i in range(len(signals)):
+    signals[i] = signals[i]._replace(offset = offs)
+    if '16' in signals[i].type:
+      offs = offs + 2
+    else:
+      offs = offs + 1
+
+  # Package size, not including key
+  package_size = offs
+
   main()
