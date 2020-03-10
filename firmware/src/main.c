@@ -63,6 +63,8 @@ int main(void)
 
     diag->servo_angle = calc_y(cfg, diag);
 
+    diag->motor_speed = cfg->max_spd;
+
     if (rx_buf->state != NO_CMD){
       uart_handle_cmd(rx_buf, cfg);
     }
@@ -72,7 +74,7 @@ int main(void)
     }
 
     if (cfg->car_state == RUN) {
-      motor_set_speed(cfg->max_spd);
+      motor_set_speed(diag->motor_speed);
       servo_set_angle(diag->servo_angle);
     } else {
       motor_set_speed(0);
