@@ -26,7 +26,6 @@ int main(void)
   diag->key2 = 0xBB;
   diag->servo_angle = 0;
   diag->motor_speed = 0;
-  diag->battery_voltage = 0;
 
   if ( flash_read(cfg, sizeof(car_cfg)) != 0 ) {
     cfg->k_p = 200;
@@ -64,6 +63,8 @@ int main(void)
 
     diag->servo_angle = calc_y(cfg, diag);
 
+    diag->motor_speed = cfg->max_spd;
+
     if (rx_buf->state != NO_CMD){
       uart_handle_cmd(rx_buf, cfg);
     }
@@ -73,7 +74,7 @@ int main(void)
     }
 
     if (cfg->car_state == RUN) {
-      motor_set_speed(cfg->max_spd);
+      motor_set_speed(diag->motor_speed);
       servo_set_angle(diag->servo_angle);
     } else {
       motor_set_speed(0);
