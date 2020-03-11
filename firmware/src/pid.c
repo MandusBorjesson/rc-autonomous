@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "pid.h"
+#include "main.h"
 
 int16_t calc_p(int16_t err, uint16_t k_p) {
   return limit_signal( (err * k_p) / K_ATT );
@@ -8,7 +9,7 @@ int16_t calc_p(int16_t err, uint16_t k_p) {
 int16_t calc_i(int16_t err, uint16_t k_i) {
   static int32_t integral = 0;
 
-  integral = limit_signal(integral+err);
+  integral = limit_signal(integral+err / (1000 / LOOP_INTERVAL_MS));
 
   return limit_signal( (integral * k_i) / K_ATT );
 }
@@ -16,7 +17,7 @@ int16_t calc_i(int16_t err, uint16_t k_i) {
 int16_t calc_d(int16_t err, uint16_t k_d) {
   static int16_t old_err = 0;
 
-  int derivative = err - old_err;
+  int derivative = (err - old_err) * (1000 / LOOP_INTERVAL_MS);
 
   old_err = err;
 
