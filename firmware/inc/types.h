@@ -8,6 +8,7 @@ extern "C" {
 #include <stdint.h>
 
 #define RX_BUF_SZ 16
+#define FIFO_SZ 16
 
 typedef enum car_status {WAIT, STOP, RUN} car_status;
 
@@ -41,6 +42,12 @@ typedef struct uart_buf {
   uint16_t counter;
   enum uart_state state;
 } uart_buf;
+
+typedef struct fifo {
+  char buf[FIFO_SZ];
+  uint8_t head;
+  uint8_t tail;
+} fifo;
 
 #ifdef __cplusplus
 }

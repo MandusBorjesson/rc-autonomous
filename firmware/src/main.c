@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "distance_sensor.h"
+#include "fifo.h"
 #include "flash.h"
 #include "main.h"
 #include "motor.h"
@@ -19,6 +20,7 @@ int main(void)
   diag = &diagnostics;
   cfg = &config;
   rx_buf = &uart_buffer;
+  memset(&rx_fifo, 0 , sizeof(fifo));
 
   uint8_t send_buf[sizeof(car_diag)];
 

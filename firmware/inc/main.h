@@ -22,6 +22,8 @@ car_cfg* cfg;
 uart_buf uart_buffer;
 uart_buf* rx_buf;
 
+fifo rx_fifo;
+
 void sysclk_cfg(void);
 void setup_main(void);
 void enter_sleep(void);
