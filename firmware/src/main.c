@@ -19,13 +19,9 @@ int main(void)
 {
   diag = &diagnostics;
   cfg = &config;
-  rx_buf = &uart_buffer;
+  memset(&cmd_line, 0, sizeof(command_line));
   memset(&rx_fifo, 0 , sizeof(fifo));
 
-  uint8_t send_buf[sizeof(car_diag)];
-
-  diag->key1 = 0xAA;
-  diag->key2 = 0xBB;
   diag->servo_angle = 0;
   diag->motor_speed = 0;
 
@@ -61,14 +57,19 @@ int main(void)
   while (1)
   {
     adc_sample_channels();
-    diag->sensor_distance = sensor_get_value(ADC_SENS_OFFS);
+    diag->dist = sensor_get_value(ADC_SENS_OFFS);
 
     diag->servo_angle = calc_y(cfg, diag);
 
     diag->motor_speed = cfg->max_spd;
 
-    if (rx_buf->state != NO_CMD){
-      uart_handle_cmd(rx_buf, cfg);
+    char key;
+    while (fifo_pop(&key, &rx_fifo) == NONE) {
+      uart_handle_key(key, &cmd_line);
+    }
+
+    if (cmd_line.status == CMD_BUSY) {
+      // Do command stuff
     }
 
     if ( startpin_get() == 0 ) {
@@ -82,9 +83,6 @@ int main(void)
       motor_set_speed(0);
       servo_set_angle(0);
    }
-
-    memcpy(&send_buf, diag, sizeof(send_buf));
-    uart_send(send_buf, sizeof(send_buf));
 
     enter_sleep();
   }

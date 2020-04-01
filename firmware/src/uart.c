@@ -54,56 +54,137 @@ void uart_init(void) {
   NVIC_SetPriority(USART1_IRQn,2);
 }
 
-void uart_send(uint8_t *data, uint16_t size) {
-  uint16_t counter = size;
-  while(counter > 0)
-  {
-    counter--;
-    // Wait for USART
+void uart_send(char* data) {
+  while(*data != 0) {
     while((UART_USART->ISR & USART_ISR_TXE) != USART_ISR_TXE) {}
     UART_USART->TDR = (*data++ & (uint8_t)0xFFU);
   }
   while((UART_USART->ISR & USART_ISR_TC) != USART_ISR_TC) {}
 }
 
-void uart_handle_cmd(uart_buf* pb, car_cfg* pc) {
-  char cmd[RX_BUF_SZ] = {0};
-  int val = 0;
-  char *off;
+void uart_send_sz(char *data, uint16_t size) {
+  while(size-- > 0)
+  {
+    while((UART_USART->ISR & USART_ISR_TXE) != USART_ISR_TXE) {}
+    UART_USART->TDR = (*data++ & (uint8_t)0xFFU);
+  }
+  while((UART_USART->ISR & USART_ISR_TC) != USART_ISR_TC) {}
+}
 
-  if (pb->state == BUF_FULL) {
-    memset(pb->buf, 0, RX_BUF_SZ);
-    pb->counter = 0;
-    pb->state = NO_CMD;
+void uart_handle_key(char key, command_line *pl) {
+  uint16_t val = 0;
+  static char parse_ansi = 0;
+
+  if (key == KEY_ETX) {
+    pl->status = CMD_NONE;
+    uart_send(ESC_CSH);
+  } else if (pl->status != CMD_NONE) {
+    return;
   }
 
-  off = strchr(pb->buf,'=');
-
-  if (off != NULL) {
-    memcpy(cmd, pb->buf, off - pb->buf);
-    val = atoi(off+1);
+  if (parse_ansi) {
+    if (key >= 'A' && key <= 'Z') {
+       val = 0x0100 + key;
+      parse_ansi = 0;
+    } else {
+      return;
+    }
   } else {
-    memcpy(cmd, pb->buf, RX_BUF_SZ);
+    val = key;
   }
 
-  if (strcmp(cmd, "start") == 0)
-        pc->car_state = RUN;
-  else if (strcmp(cmd, "stop") == 0)
-        pc->car_state = STOP;
-  else if (strcmp(cmd, "store_cfg") == 0)
-        flash_write(pc, sizeof(car_cfg));
-  else if (strcmp(cmd, "k_p") == 0)
-        pc->k_p = val;
-  else if (strcmp(cmd, "k_i") == 0)
-        pc->k_i = val;
-  else if (strcmp(cmd, "k_d") == 0)
-        pc->k_d = val;
-  else if (strcmp(cmd, "max_spd") == 0)
-        pc->max_spd = val;
-  else if (strcmp(cmd, "trg_dist") == 0)
-        pc->trg_dist = val;
+  switch (val)
+  {
+  case KEY_ESC:
+    parse_ansi = 1;
+    break;
 
-  memset(pb->buf, 0, RX_BUF_SZ);
-  pb->counter = 0;
-  pb->state = NO_CMD;
+  case KEY_LFT:
+    if (pl->cur_pos > 0) {
+      uart_send(ESC_LFT);
+      pl->cur_pos--;
+    }
+    break;
+
+  case KEY_RGT:
+    if (pl->cur_pos < pl->counter) {
+      uart_send(ESC_RGT);
+      pl->cur_pos++;
+    }
+    break;
+
+  case KEY_DEL:
+    if (pl->cur_pos < pl->counter) {
+      pl->cur_pos++;
+    } else {
+      break;
+    }
+  case KEY_BSP:
+    if (pl->counter == 0 || pl->cur_pos == 0)
+      break;
+
+    for (int i = pl->cur_pos - 1; i < pl->counter; i++) {
+      pl->buf[i] = pl->buf[i+1];
+    }
+    pl->buf[pl->counter] = 0;
+
+    pl->cur_pos--;
+    pl->counter--;
+
+    uart_send(ESC_SCP);
+    uart_send(ESC_ERL);
+    uart_send("\r> ");
+    uart_send_sz(pl->buf, pl->counter);
+    uart_send(ESC_RCP);
+    uart_send(ESC_LFT);
+    break;
+
+  case KEY_CR:
+  case KEY_ENT:
+    pl->status = CMD_PEND;
+    break;
+
+  case KEY_ETX:
+    uart_send("\r\n> ");
+
+    memset(pl->buf, 0, CMD_BUF_SZ);
+    pl->cur_pos = 0;
+    pl->counter = 0;
+    break;
+
+  case KEY_FF:
+      uart_send(ESC_ERD);
+      uart_send("> ");
+      uart_send_sz(pl->buf, pl->counter);
+      break;
+
+  case ' ' ... '~':
+    if (pl->counter + 1 >= CMD_BUF_SZ) {
+      uart_send(ESC_SCP);
+      uart_send(ESC_ERL);
+      uart_send("\rERROR: Command buffer full.\n");
+      uart_send("\r> ");
+      uart_send_sz(pl->buf, pl->counter);
+      uart_send(ESC_RCP);
+      uart_send(ESC_DWN);
+    } else {
+      for (int i = pl->counter; i > pl->cur_pos; i--) {
+        pl->buf[i] = pl->buf[i-1];
+      }
+      pl->buf[pl->cur_pos] = key;
+
+      pl->counter++;
+      pl->cur_pos++;
+      uart_send(ESC_SCP);
+      uart_send(ESC_ERL);
+      uart_send("\r> ");
+      uart_send_sz(pl->buf, pl->counter);
+      uart_send(ESC_RCP);
+      uart_send(ESC_RGT);
+    }
+    break;
+
+  default:
+    break;
+  }
 }

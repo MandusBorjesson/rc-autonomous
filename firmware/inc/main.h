@@ -19,8 +19,7 @@ car_diag* diag;
 car_cfg config;
 car_cfg* cfg;
 
-uart_buf uart_buffer;
-uart_buf* rx_buf;
+command_line cmd_line;
 
 fifo rx_fifo;
 

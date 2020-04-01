@@ -7,7 +7,7 @@ extern "C" {
 
 #include <stdint.h>
 
-#define RX_BUF_SZ 16
+#define CMD_BUF_SZ 64
 #define FIFO_SZ 16
 
 typedef enum car_status {WAIT, STOP, RUN} car_status;
@@ -24,9 +24,7 @@ typedef struct car_cfg {
 
 typedef struct car_diag {
   /* Outputs */
-  uint8_t key1;
-  uint8_t key2;
-  uint16_t sensor_distance;
+  uint16_t dist;
   int16_t err;
   int16_t s_p;
   int16_t s_i;
@@ -35,13 +33,15 @@ typedef struct car_diag {
   int8_t motor_speed;
 } car_diag;
 
-typedef enum uart_state {NO_CMD, CMD_RDY, BUF_FULL} uart_state;
+typedef enum cmd_status {CMD_NONE, CMD_PEND, CMD_BUSY} cmd_status;
 
-typedef struct uart_buf {
-  char buf[RX_BUF_SZ];
+typedef struct command_line {
+  char buf[CMD_BUF_SZ];
+  char zero; // DO NOT MODIFY! Ensures buf is always zero-terminated
   uint16_t counter;
-  enum uart_state state;
-} uart_buf;
+  uint16_t cur_pos;
+  enum cmd_status status;
+} command_line;
 
 typedef struct fifo {
   char buf[FIFO_SZ];
