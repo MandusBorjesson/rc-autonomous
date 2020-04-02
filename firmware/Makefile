@@ -37,6 +37,7 @@ BUILD_DIR = build
 # C sources
 C_SOURCES =  \
 src/distance_sensor.c \
+src/cmd_handler.c \
 src/fifo.c \
 src/flash.c \
 src/main.c \

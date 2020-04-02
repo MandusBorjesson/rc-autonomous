@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "distance_sensor.h"
+#include "cmd_handler.h"
 #include "fifo.h"
 #include "flash.h"
 #include "main.h"
@@ -69,7 +70,13 @@ int main(void)
     }
 
     if (cmd_line.status == CMD_BUSY) {
-      // Do command stuff
+      cmd_line.status = handle_cmd(cmd_line.buf, cfg, diag);
+      if (cmd_line.status == CMD_NONE) {
+        uart_send("\r\n> ");
+        memset(cmd_line.buf, 0, CMD_BUF_SZ);
+        cmd_line.cur_pos = 0;
+        cmd_line.counter = 0;
+      }
     }
 
     if ( startpin_get() == 0 ) {
