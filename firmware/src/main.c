@@ -70,7 +70,7 @@ int main(void)
     }
 
     if (cmd_line.status == CMD_BUSY) {
-      cmd_line.status = handle_cmd(cmd_line.buf, cfg, diag);
+      cmd_line.status = handle_cmd(cmd_line.buf, cfg, diag, cmd_line.status);
       if (cmd_line.status == CMD_NONE) {
         uart_send("\r\n> ");
         memset(cmd_line.buf, 0, CMD_BUF_SZ);
