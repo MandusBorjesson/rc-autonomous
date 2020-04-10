@@ -21,19 +21,6 @@
       "options": {
         "cwd": "${workspaceRoot}/firmware"
       }
-    },
-    {
-      "taskName": "Run python plotter",
-      "command": "python3",
-      "args": [
-        "infoplotter.py"
-      ],
-      "isShellCommand": true,
-      "isBuildCommand": true,
-      "options": {
-        "cwd": "${workspaceRoot}/tools"
-      },
-      "problemMatcher": []
     }
   ]
 }
