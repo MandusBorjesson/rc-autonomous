@@ -25,7 +25,7 @@ int16_t calc_d(int16_t err, uint16_t k_d) {
 }
 
 int8_t calc_y(car_cfg* cfg, car_diag* diag) {
-  int16_t err = limit_signal(diag->sensor_distance - cfg->trg_dist);
+  int16_t err = limit_signal(diag->dist - cfg->trg_dist);
   diag->err = err;
   diag->s_p = calc_p(err, cfg->k_p);
   diag->s_i = calc_i(err, cfg->k_i);

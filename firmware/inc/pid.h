@@ -10,6 +10,7 @@
 
 // Signal attenuation, having a gain K_ATT will result in no amplification
 #define K_ATT 4096
+#define K_MAX 65535
 
 // Max and min signal value, pid signals are limited to [S_MIN S_MAX]
 #define S_MAX 32767

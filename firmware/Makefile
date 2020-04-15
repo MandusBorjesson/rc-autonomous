@@ -37,6 +37,8 @@ BUILD_DIR = build
 # C sources
 C_SOURCES =  \
 src/distance_sensor.c \
+src/cmd_handler.c \
+src/fifo.c \
 src/flash.c \
 src/main.c \
 src/motor.c \
@@ -116,6 +118,16 @@ endif
 # Generate dependency information
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 
+#######################################
+# DATE AND GIT DEFINES
+#######################################
+CFLAGS += -DCOMPILEDATE='"$(shell date +'%Y-%m-%d %H:%M')"'
+CFLAGS += -DGITBRANCH='"$(shell git branch --show-current)"'
+ifeq ($(shell git status --porcelain),)
+	CFLAGS += -DGITCOMMIT='"$(shell git rev-parse --short HEAD)"'
+else
+	CFLAGS += -DGITCOMMIT='"$(shell git rev-parse --short HEAD)-dirty"'
+endif
 
 #######################################
 # LDFLAGS
