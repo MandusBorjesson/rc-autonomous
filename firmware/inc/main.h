@@ -14,13 +14,8 @@ extern "C" {
 #define STARTPIN_IOBANK GPIOB
 
 car_diag diagnostics;
-car_diag* diag;
-
 car_cfg config;
-car_cfg* cfg;
-
 command_line cmd_line;
-
 fifo rx_fifo;
 
 void sysclk_cfg(void);

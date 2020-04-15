@@ -18,23 +18,16 @@
   */
 int main(void)
 {
-  diag = &diagnostics;
-  cfg = &config;
+  memset(&diagnostics, 0, sizeof(car_diag));
+  memset(&config, 0, sizeof(car_cfg));
   memset(&cmd_line, 0, sizeof(command_line));
   memset(&rx_fifo, 0 , sizeof(fifo));
 
-  diag->servo_angle = 0;
-  diag->motor_speed = 0;
-
-  if ( flash_read(cfg, sizeof(car_cfg)) != 0 ) {
-    cfg->k_p = 200;
-    cfg->k_i = 0;
-    cfg->k_d = 0;
-    cfg->max_spd = 140;
-    cfg->trg_dist = 100;
+  if ( flash_read(&config, sizeof(car_cfg)) != 0 ) {
+    /* Print error */
   }
 
-  cfg->car_state = WAIT;
+  config.car_state = WAIT;
 
   /* Start delay */
   for (unsigned long int i = 0; i < 1000000; i++) {
@@ -58,19 +51,19 @@ int main(void)
   while (1)
   {
     adc_sample_channels();
-    diag->dist = sensor_get_value(ADC_SENS_OFFS);
+    diagnostics.dist = sensor_get_value(ADC_SENS_OFFS);
 
-    diag->servo_angle = calc_y(cfg, diag);
+    diagnostics.servo_angle = calc_y(&config, &diagnostics);
 
-    diag->motor_speed = cfg->max_spd;
+    diagnostics.motor_speed = config.max_spd;
 
     char key;
     while (fifo_pop(&key, &rx_fifo) == NONE) {
       uart_handle_key(key, &cmd_line);
     }
 
-    if (cmd_line.status == CMD_BUSY) {
-      cmd_line.status = handle_cmd(cmd_line.buf, cfg, diag, cmd_line.status);
+    if (cmd_line.status != CMD_NONE) {
+      cmd_line.status = handle_cmd(cmd_line.buf, &config, &diagnostics, cmd_line.status);
       if (cmd_line.status == CMD_NONE) {
         uart_send("\r\n> ");
         memset(cmd_line.buf, 0, CMD_BUF_SZ);
@@ -80,12 +73,12 @@ int main(void)
     }
 
     if ( startpin_get() == 0 ) {
-      cfg->car_state = RUN;
+      config.car_state = RUN;
     }
 
-    if (cfg->car_state == RUN) {
-      motor_set_speed(diag->motor_speed);
-      servo_set_angle(diag->servo_angle);
+    if (config.car_state == RUN) {
+      motor_set_speed(diagnostics.motor_speed);
+      servo_set_angle(diagnostics.servo_angle);
     } else {
       motor_set_speed(0);
       servo_set_angle(0);
