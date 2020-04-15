@@ -5,7 +5,7 @@
 #include "stm32f0xx.h"
 
 /******************************************************************************/
-/*           Cortex-M0 Processor Interruption and Exception Handlers          */ 
+/*           Cortex-M0 Processor Interruption and Exception Handlers          */
 /******************************************************************************/
 /**
   * @brief This function handles Non maskable interrupt.
@@ -40,11 +40,11 @@ void SysTick_Handler(void) {}
 /* please refer to the startup file (startup_stm32f0xx.s).                    */
 /******************************************************************************/
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif /* __cplusplus */
 
 void TIM16_IRQHandler(void) {
-  TIM16->SR &= ~TIM_SR_UIF; // Clear interrupt
+  TIM16->SR &= ~TIM_SR_UIF;  // Clear interrupt
   enter_run();
 }
 

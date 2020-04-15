@@ -1,8 +1,8 @@
-#ifndef __distance_sensor_H
-#define __distance_sensor_H
+#ifndef FIRMWARE_INC_DISTANCE_SENSOR_H_
+#define FIRMWARE_INC_DISTANCE_SENSOR_H_
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 #define SENSOR_ADC ADC1
@@ -29,4 +29,4 @@ uint16_t sensor_get_value(uint8_t off);
 }
 #endif
 
-#endif /*__ distance_sensor_H */
+#endif  // FIRMWARE_INC_DISTANCE_SENSOR_H_

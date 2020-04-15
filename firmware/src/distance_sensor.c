@@ -8,10 +8,10 @@ int sensor_init(void) {
   RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
   RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
 
-  SENSOR_IOBANK->MODER |= (3 << GPIO_MODER_MODER3_Pos); // Analog
+  SENSOR_IOBANK->MODER |= (3 << GPIO_MODER_MODER3_Pos);  // Analog
 
   /* Calibrate ADC */
-  unsigned long int timeout;
+  uint64_t timeout;
 
   if ((ADC1->CR & ADC_CR_ADEN) != 0) {
     ADC1->CR |= ADC_CR_ADDIS;
@@ -20,7 +20,7 @@ int sensor_init(void) {
   timeout = 0;
   while ((ADC1->CR & ADC_CR_ADEN) != 0) {
     timeout++;
-    if(timeout > TIMEOUT_MAX) {
+    if (timeout > TIMEOUT_MAX) {
       return ADC_STAT_EN_FAIL;
     }
   }
@@ -31,7 +31,7 @@ int sensor_init(void) {
   timeout = 0;
   while ((ADC1->CR & ADC_CR_ADCAL) != 0) {
     timeout++;
-    if(timeout > TIMEOUT_MAX) {
+    if (timeout > TIMEOUT_MAX) {
       return ADC_STAT_ADCAL_FAIL;
     }
   }
@@ -41,10 +41,9 @@ int sensor_init(void) {
   RCC->CR2 |= RCC_CR2_HSI14ON;
 
   timeout = 0;
-  while ((RCC->CR2 & RCC_CR2_HSI14RDY) == 0)
-  {
+  while ((RCC->CR2 & RCC_CR2_HSI14RDY) == 0) {
     timeout++;
-    if(timeout > TIMEOUT_MAX) {
+    if (timeout > TIMEOUT_MAX) {
       return ADC_STAT_RCC_FAIL;
     }
   }
@@ -52,14 +51,14 @@ int sensor_init(void) {
 
   /* ADC Enable sequence */
   if ((ADC1->ISR & ADC_ISR_ADRDY) != 0) {
-    ADC1->ISR |= ADC_ISR_ADRDY; // Clear interrupt if set
+    ADC1->ISR |= ADC_ISR_ADRDY;  // Clear interrupt if set
   }
   ADC1->CR |= ADC_CR_ADEN;
 
   timeout = 0;
   while ((ADC1->ISR & ADC_ISR_ADRDY) == 0) {
     timeout++;
-    if(timeout > TIMEOUT_MAX) {
+    if (timeout > TIMEOUT_MAX) {
       return ADC_STAT_ISR_EN_FAIL;
     }
   }
@@ -88,11 +87,11 @@ int adc_sample_channels(void) {
     unsigned int timeout = 0;
     while ((ADC1->ISR & ADC_ISR_EOC) == 0) {
       timeout++;
-      if(timeout > TIMEOUT_MAX) {
+      if (timeout > TIMEOUT_MAX) {
         return ADC_STAT_CONV_FAIL;
       }
     }
-    adc_buf[i] = (ADC1->DR) << 4; // Get value, 12 bits -> 16 bits
+    adc_buf[i] = (ADC1->DR) << 4;  // Get value, 12 bits -> 16 bits
   }
 
   return ADC_STAT_OK;

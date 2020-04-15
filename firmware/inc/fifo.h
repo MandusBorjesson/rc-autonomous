@@ -1,8 +1,8 @@
-#ifndef __fifo_H
-#define __fifo_H
+#ifndef FIRMWARE_INC_FIFO_H_
+#define FIRMWARE_INC_FIFO_H_
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 #include "types.h"
@@ -16,4 +16,4 @@ fifo_err fifo_pop(char* val, fifo* pf);
 }
 #endif
 
-#endif /*__ __fifo_H */
+#endif  // FIRMWARE_INC_FIFO_H_

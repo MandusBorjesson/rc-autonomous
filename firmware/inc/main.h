@@ -1,5 +1,5 @@
-#ifndef __MAIN_H
-#define __MAIN_H
+#ifndef FIRMWARE_INC_MAIN_H_
+#define FIRMWARE_INC_MAIN_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,4 +29,4 @@ int startpin_get(void);
 }
 #endif
 
-#endif /* __MAIN_H */
+#endif  // FIRMWARE_INC_MAIN_H_

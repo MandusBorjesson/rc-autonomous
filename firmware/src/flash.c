@@ -23,8 +23,7 @@ static int flash_page_erase(uint32_t offs) {
 
   if ((FLASH->SR & FLASH_SR_EOP) != 0) {
     FLASH->SR = FLASH_SR_EOP;
-  }
-  else {
+  } else {
     /* TODO: error handling */
   }
   FLASH->CR &= ~FLASH_CR_PER;
@@ -32,7 +31,7 @@ static int flash_page_erase(uint32_t offs) {
 }
 
 static int flash_program(void* data, uint32_t len) {
-  len = (len+1)/2; // Len is in bytes, div by 4 and round up to make uint16
+  len = (len+1)/2;  // Len is in bytes, div by 4 and round up to make uint16
 
   if ( len > USR_MEM_SZ )
     return -1;
@@ -48,9 +47,7 @@ static int flash_program(void* data, uint32_t len) {
 
   if ((FLASH->SR & FLASH_SR_EOP) != 0) {
     FLASH->SR = FLASH_SR_EOP;
-  }
-  else
-  {
+  } else {
     /* TODO: error handling */
   }
   FLASH->CR &= ~FLASH_CR_PG;

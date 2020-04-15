@@ -1,12 +1,10 @@
-/* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __STM32F0xx_IT_H
-#define __STM32F0xx_IT_H
+#ifndef FIRMWARE_INC_STM32F0XX_IT_H_
+#define FIRMWARE_INC_STM32F0XX_IT_H_
 
 #ifdef __cplusplus
- extern "C" {
-#endif 
+extern "C" {
+#endif
 
-/* Exported functions prototypes ---------------------------------------------*/
 void NMI_Handler(void);
 void HardFault_Handler(void);
 void SVC_Handler(void);
@@ -19,4 +17,4 @@ void USART1_IRQHandler(void);
 }
 #endif
 
-#endif /* __STM32F0xx_IT_H */
+#endif  // FIRMWARE_INC_STM32F0XX_IT_H_

@@ -1,5 +1,5 @@
-#ifndef __FLASH_H
-#define __FLASH_H
+#ifndef FIRMWARE_INC_FLASH_H_
+#define FIRMWARE_INC_FLASH_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,4 +19,4 @@ int flash_read(void* data, uint32_t len);
 }
 #endif
 
-#endif /* __FLASH_H */
+#endif  // FIRMWARE_INC_FLASH_H_

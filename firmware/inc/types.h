@@ -1,5 +1,5 @@
-#ifndef __TYPES_H
-#define __TYPES_H
+#ifndef FIRMWARE_INC_TYPES_H_
+#define FIRMWARE_INC_TYPES_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,7 +37,7 @@ typedef enum cmd_status {CMD_NONE, CMD_PEND, CMD_BUSY} cmd_status;
 
 typedef struct command_line {
   char buf[CMD_BUF_SZ];
-  char zero; // DO NOT MODIFY! Ensures buf is always zero-terminated
+  char zero;  // DO NOT MODIFY! Ensures buf is always zero-terminated
   uint16_t counter;
   uint16_t cur_pos;
   enum cmd_status status;
@@ -53,4 +53,4 @@ typedef struct fifo {
 }
 #endif
 
-#endif /* __TYPES_H */
+#endif  // FIRMWARE_INC_TYPES_H_

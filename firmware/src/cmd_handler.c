@@ -12,7 +12,7 @@ uint16_t strtokval(char *val) {
   uint8_t offset = 0;
   uint32_t value = 0;
 
-  while(*val) {
+  while (*val) {
     if (isdigit(*val)) {
       value = value * 10 + (*val-'0');
       offset++;
@@ -60,7 +60,7 @@ void print_xy(char *line, uint8_t x, uint8_t y) {
 char match_cmd(char *cmd, char *match) {
   while (*match !=0) {
     if (*cmd++ != *match++) {
-      if (*(match-1) != '*'){
+      if (*(match-1) != '*') {
         return 0;
       }
     }
@@ -183,13 +183,13 @@ void show_info(void) {
 
 void set_parameter(char *par, car_cfg *pc) {
   char* val = find_next_word(par);
-  if(!par || !val) {
+  if (!par || !val) {
     show_help("set");
     return;
   }
 
   if (match_cmd(par, "k_*")) {
-    if(par[2] == 'p') {
+    if (par[2] == 'p') {
       pc->k_p = strtokval(val);
     } else if (par[2] == 'i') {
       pc->k_i = strtokval(val);
@@ -208,7 +208,7 @@ void set_parameter(char *par, car_cfg *pc) {
 }
 
 void get_parameters(car_cfg *pc) {
-  char buf[8] = {};
+  char buf[8];
 
   uart_send("\n\rcar_cfg");
 
@@ -226,8 +226,7 @@ void get_parameters(car_cfg *pc) {
   uart_send(itoa(pc->trg_dist, buf, 10));
 
   uart_send("\n\r car_state: ");
-  switch (pc->car_state)
-  {
+  switch (pc->car_state) {
   case WAIT:
     uart_send("WAIT");
     break;
@@ -255,7 +254,7 @@ void plot_parameter(char *base, car_diag *pd, cmd_status stat) {
     uart_send(ESC_CHD);
   }
 
-  while(par) {
+  while (par) {
     x_val = 0;
     y_val++;
     zero = 32;
@@ -266,7 +265,7 @@ void plot_parameter(char *base, car_diag *pd, cmd_status stat) {
     } else if (match_cmd(par, "err")) {
         x_val = pd->err / 1024 + 32;
     } else if (match_cmd(par, "s_*")) {
-      if(par[2] == 'p') {
+      if (par[2] == 'p') {
         x_val = pd->s_p / 1024 + 32;
       } else if (par[2] == 'i') {
         x_val = pd->s_i / 1024 + 32;

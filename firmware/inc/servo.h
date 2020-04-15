@@ -1,15 +1,15 @@
-#ifndef __servo_H
-#define __servo_H
+#ifndef FIRMWARE_INC_SERVO_H_
+#define FIRMWARE_INC_SERVO_H_
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 #include <stdint.h>
 
 #define SERVO_TIM TIM14
 #define SERVO_IOBANK GPIOB
-#define SERVO_CENTER 700 // Greater -> left, Smaller -> right
+#define SERVO_CENTER 700  // Greater -> left, Smaller -> right
 
 void servo_init(void);
 
@@ -19,4 +19,4 @@ void servo_set_angle(int8_t angle);
 }
 #endif
 
-#endif /*__ servo_H */
+#endif  // FIRMWARE_INC_SERVO_H_

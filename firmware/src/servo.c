@@ -10,7 +10,7 @@ void servo_init(void) {
 
   SERVO_IOBANK->AFR[0] = 0 << GPIO_AFRL_AFRL0_Pos;
 
-  RCC->APB1ENR |= RCC_APB1ENR_TIM14EN; // Enable clock
+  RCC->APB1ENR |= RCC_APB1ENR_TIM14EN;  // Enable clock
 
   SERVO_TIM->PSC = 50;
   SERVO_TIM->ARR = 8192;
