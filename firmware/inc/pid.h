@@ -1,8 +1,8 @@
-#ifndef __pid_H
-#define __pid_H
+#ifndef FIRMWARE_INC_PID_H_
+#define FIRMWARE_INC_PID_H_
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 #include <stdint.h>
@@ -27,4 +27,4 @@ int16_t limit_signal(int32_t s);
 }
 #endif
 
-#endif /*__ __pid_H */
+#endif  // FIRMWARE_INC_PID_H_

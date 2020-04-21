@@ -1,8 +1,8 @@
-#ifndef __motor_H
-#define __motor_H
+#ifndef FIRMWARE_INC_MOTOR_H_
+#define FIRMWARE_INC_MOTOR_H_
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 #include <stdint.h>
@@ -24,4 +24,4 @@ void motor_set_ilim(uint8_t ilim);
 }
 #endif
 
-#endif /*__ __motor_H */
+#endif  // FIRMWARE_INC_MOTOR_H_

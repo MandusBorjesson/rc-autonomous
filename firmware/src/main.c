@@ -12,12 +12,7 @@
 #include "servo.h"
 #include "uart.h"
 
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
-int main(void)
-{
+int main(void) {
   memset(&diagnostics, 0, sizeof(car_diag));
   memset(&config, 0, sizeof(car_cfg));
   memset(&cmd_line, 0, sizeof(command_line));
@@ -30,7 +25,7 @@ int main(void)
   config.car_state = WAIT;
 
   /* Start delay */
-  for (unsigned long int i = 0; i < 1000000; i++) {
+  for (uint64_t i = 0; i < 1000000; i++) {
     __NOP();
   }
 
@@ -42,14 +37,13 @@ int main(void)
   servo_init();
   startpin_init();
   if (sensor_init() != ADC_STAT_OK) {
-    while(1); // Lock up
+    while (1) {}  // Lock up
   }
 
   motor_set_ilim(255);
   motor_set_speed(0);
 
-  while (1)
-  {
+  while (1) {
     adc_sample_channels();
     diagnostics.dist = sensor_get_value(ADC_SENS_OFFS);
 
@@ -63,7 +57,8 @@ int main(void)
     }
 
     if (cmd_line.status != CMD_NONE) {
-      cmd_line.status = handle_cmd(cmd_line.buf, &config, &diagnostics, cmd_line.status);
+      cmd_line.status = handle_cmd(cmd_line.buf, &config,
+                                   &diagnostics, cmd_line.status);
       if (cmd_line.status == CMD_NONE) {
         uart_send("\r\n> ");
         memset(cmd_line.buf, 0, CMD_BUF_SZ);
@@ -82,18 +77,13 @@ int main(void)
     } else {
       motor_set_speed(0);
       servo_set_angle(0);
-   }
+    }
 
     enter_sleep();
   }
 }
 
-/**
-  * @brief System Clock Configuration, 24 MHz using HSI and PLL
-  * @retval None
-  */
-void sysclk_cfg(void)
-{
+void sysclk_cfg(void) {
   // HSI Configuration
   RCC->CR |= RCC_CR_HSION;
   while ((RCC->CR & RCC_CR_HSIRDY) == 0) {}  // Wait for HSI
@@ -123,12 +113,8 @@ void sysclk_cfg(void)
   RCC->CFGR |= RCC_CFGR_PPRE_DIV1;
 }
 
-/**
-  * @brief  Set up main loop timer, resonsible for the loop interval.
-  * @retval None
-  */
 void setup_main(void) {
-  RCC->APB2ENR |= RCC_APB2ENR_TIM16EN; // Enable clock
+  RCC->APB2ENR |= RCC_APB2ENR_TIM16EN;  // Enable clock
   MAIN_LOOP_TIMER->PSC = 2400;
   MAIN_LOOP_TIMER->ARR = LOOP_INTERVAL_MS;
   MAIN_LOOP_TIMER->DIER = TIM_DIER_UIE;
@@ -137,26 +123,16 @@ void setup_main(void) {
                           TIM_CR1_CEN;
 
   NVIC_EnableIRQ(TIM16_IRQn);
-  NVIC_SetPriority(TIM16_IRQn,2);
+  NVIC_SetPriority(TIM16_IRQn, 2);
 }
 
-/**
-  * @brief  Enter sleep mode (CPU off, peripherals running)
-  * @retval None
-  */
-void enter_sleep(void)
-{
-    SCB->SCR &= ~( SCB_SCR_SLEEPDEEP_Msk );
+void enter_sleep(void) {
+    SCB->SCR &= ~(SCB_SCR_SLEEPDEEP_Msk);
     SCB->SCR |= SCB_SCR_SLEEPONEXIT_Msk;
     __WFI();
 }
 
-/**
-  * @brief  Enter run mode (CPU and peripherals on)
-  * @retval None
-  */
-void enter_run(void)
-{
+void enter_run(void) {
   SCB->SCR &= ~SCB_SCR_SLEEPONEXIT_Msk;
   __SEV();
 }
@@ -169,5 +145,5 @@ void startpin_init(void) {
 }
 
 int startpin_get(void) {
-  return ( (STARTPIN_IOBANK->IDR & GPIO_IDR_2) > 0) ? 1 : 0;
+  return ((STARTPIN_IOBANK->IDR & GPIO_IDR_2) > 0) ? 1 : 0;
 }
