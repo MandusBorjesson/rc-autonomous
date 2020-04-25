@@ -44,6 +44,7 @@ src/main.c \
 src/motor.c \
 src/pid.c \
 src/servo.c \
+src/spi.c \
 src/stm32f0xx_it.c \
 src/system_stm32f0xx.c \
 src/uart.c \

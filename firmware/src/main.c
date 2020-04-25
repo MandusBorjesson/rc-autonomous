@@ -10,6 +10,7 @@
 #include "motor.h"
 #include "pid.h"
 #include "servo.h"
+#include "spi.h"
 #include "uart.h"
 
 int main(void) {
@@ -36,6 +37,7 @@ int main(void) {
   uart_init();
   servo_init();
   startpin_init();
+  spi_init();
   if (sensor_init() != ADC_STAT_OK) {
     while (1) {}  // Lock up
   }
@@ -44,6 +46,11 @@ int main(void) {
   motor_set_speed(0);
 
   while (1) {
+    OE_IOBANK->ODR &= ~(1 << OE_PIN_Pos);
+
+    uint32_t counter = 0xC00003;
+    spi_send((char*)&counter, 3);
+
     adc_sample_channels();
     diagnostics.dist = sensor_get_value(ADC_SENS_OFFS);
 
@@ -78,6 +85,7 @@ int main(void) {
       motor_set_speed(0);
       servo_set_angle(0);
     }
+    OE_IOBANK->ODR |= (1 << OE_PIN_Pos);
 
     enter_sleep();
   }
