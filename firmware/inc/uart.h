@@ -11,7 +11,7 @@ extern "C" {
 
 #define UART_USART USART1
 #define UART_IOBANK GPIOA
-#define UART_BAUD 9600
+#define UART_BAUD 115200
 #define UART_REFCLK 24000000
 
 #define KEY_RGT 0x0143  // Right key
