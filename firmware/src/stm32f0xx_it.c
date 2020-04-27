@@ -1,6 +1,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "fifo.h"
+#include "spi.h"
 #include "stm32f0xx_it.h"
 #include "stm32f0xx.h"
 
@@ -42,6 +43,13 @@ void SysTick_Handler(void) {}
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+void DMA1_Channel2_3_IRQHandler(void) {
+  if ((DMA1->ISR & DMA_ISR_TCIF3) == DMA_ISR_TCIF3){
+    RCK_IOBANK->ODR |= (1<<RCK_PIN_Pos);
+  }
+  DMA1->IFCR |= DMA_IFCR_CGIF3 | DMA_IFCR_CGIF2;
+}
 
 void TIM16_IRQHandler(void) {
   TIM16->SR &= ~TIM_SR_UIF;  // Clear interrupt
