@@ -35,11 +35,11 @@ int main(void) {
   /* MCU Configuration */
   sysclk_cfg();
   setup_main();
-  motor_init();
   uart_init();
   servo_init();
   startpin_init();
   spi_init();
+  motor_init();
   if (sensor_init() != ADC_STAT_OK) {
     while (1) {}  // Lock up
   }
@@ -84,8 +84,7 @@ int main(void) {
     }
     if ((WUP_REASON & WUP_SPD) != 0) {
       WUP_REASON &= ~WUP_SPD;
-      diagnostics.speed = TIM2->CNT;
-
+      diagnostics.speed = motor_get_speed(config.spd.per);
       calc_y(&(config.spd), &(diagnostics.spd), diagnostics.speed);
 
       if (config.car_state == RUN) {
