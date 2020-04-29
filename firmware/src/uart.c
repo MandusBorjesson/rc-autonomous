@@ -54,12 +54,16 @@ void uart_init(void) {
   NVIC_SetPriority(USART1_IRQn, 2);
 }
 
-void uart_send(char* data) {
-  while (*data != 0) {
+void uart_send_until(char* data, char terminator) {
+  while (*data != 0 && *data != terminator) {
     while ((UART_USART->ISR & USART_ISR_TXE) != USART_ISR_TXE) {}
     UART_USART->TDR = (*data++ & (uint8_t)0xFFU);
   }
   while ((UART_USART->ISR & USART_ISR_TC) != USART_ISR_TC) {}
+}
+
+void uart_send(char* data) {
+  uart_send_until(data, 0);
 }
 
 void uart_send_sz(char *data, uint16_t size) {
