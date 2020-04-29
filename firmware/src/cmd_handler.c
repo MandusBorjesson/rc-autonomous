@@ -96,34 +96,27 @@ void show_help(char *cmd) {
   if (match_cmd(cmd, "set")) {
       uart_send("\n\rUsage: 'set par val'");
       uart_send("\n\rUsed for setting parameters. Available parameters:");
+      uart_send("\n\rAbreviations: [dst/spd]: distance from wall/speed");
       uart_send("\n\r");
-      uart_send("\n\rParameter Range     Description");
-      uart_send("\n\rk_p       0 - 16    Steering PID partial amplification");
-      uart_send("\n\rk_i       0 - 16    Steering PID integral aplification");
-      uart_send("\n\rk_d       0 - 16    Steering PID derivative amplification");
-      uart_send("\n\rmax_spd   0 - 255   Max vehicle speed");
-      uart_send("\n\rtrg_dist  0 - 65535 Target distance for steering PID");
+      uart_send("\n\rParameter       Range      Description");
+      uart_send("\n\r[dst/spd].k_p   0 - 16     PID partial amplification");
+      uart_send("\n\r[dst/spd].k_i   0 - 16     PID integral aplification");
+      uart_send("\n\r[dst/spd].k_d   0 - 16     PID derivative amplification");
+      uart_send("\n\r[dst/spd].trg   0 - 65535  PID target");
   } else if (match_cmd(cmd, "get")) {
       uart_send("\n\rUsage: 'get'");
       uart_send("\n\rUsed for getting current configiration");
-      uart_send("\n\r");
-      uart_send("\n\rParameter Range     Description");
-      uart_send("\n\rk_i       0 - 16    Steering PID integral aplification");
-      uart_send("\n\rk_p       0 - 16    Steering PID partial amplification");
-      uart_send("\n\rk_d       0 - 16    Steering PID derivative amplification");
-      uart_send("\n\rtrg_dist  0 - 65535 Target distance for steering PID");
-      uart_send("\n\rmax_spd   0 - 255   Max vehicle speed");
   } else if (match_cmd(cmd, "plot")) {
       uart_send("\n\rUsage: 'plot par1 par2 ...'");
       uart_send("\n\rUsed for plotting parameters. Available parameters:");
       uart_send("\n\r");
-      uart_send("\n\rs_p         - Steering PID partial signal");
-      uart_send("\n\rs_i         - Steering PID integral signal");
-      uart_send("\n\rs_d         - Steering PID derivative signal");
-      uart_send("\n\rdist        - Distance measured by sensors");
-      uart_send("\n\rerr         - Control error");
-      uart_send("\n\rmotor_speed - Speed of the motor");
-      uart_send("\n\rservo_angle - Steering angle of the servo");
+      uart_send("\n\r[dst/spd].s_p  -  PID partial signal");
+      uart_send("\n\r[dst/spd].s_i  -  PID integral signal");
+      uart_send("\n\r[dst/spd].s_d  -  PID derivative signal");
+      uart_send("\n\r[dst/spd].err  -  PID error");
+      uart_send("\n\r[dst/spd].out  -  PID output");
+      uart_send("\n\rspeed          -  Current car speed in mm/s");
+      uart_send("\n\rdist           -  Current sensor distance");
   } else if (match_cmd(cmd, "info")) {
       uart_send("\n\rUsage: 'info'");
       uart_send("\n\rUsed for getting information about the system");
@@ -135,7 +128,7 @@ void show_help(char *cmd) {
       uart_send("\n\rUsed to get the car into 'STOP' mode.");
   } else if (match_cmd(cmd, "save")) {
       uart_send("\n\rUsage: 'save'");
-      uart_send("\n\rUsed for saving current confirugartion to non-volatile memory.");
+      uart_send("\n\rUsed for saving current configuration to non-volatile memory.");
   } else {
       uart_send("\n\rUsage: 'help cmd'");
       uart_send("\n\rGet information about commands");
@@ -188,20 +181,25 @@ void set_parameter(char *par, car_cfg *pc) {
     return;
   }
 
-  if (match_cmd(par, "k_*")) {
-    if (par[2] == 'p') {
-      pc->k_p = strtokval(val);
-    } else if (par[2] == 'i') {
-      pc->k_i = strtokval(val);
-    } else if (par[2] == 'd') {
-      pc->k_d = strtokval(val);
-    } else {
-      uart_send("\n\rUnknown parameter!");
-    }
-  } else if (match_cmd(par, "max_spd")) {
-    pc->max_spd = (uint8_t)atol(val);
-  } else if (match_cmd(par, "trg_dist")) {
-    pc->trg_dist = (uint16_t)atol(val);
+  pid_cfg *tmp;
+
+  if (match_cmd(par, "dst.***")) {
+    tmp = &(pc->dst);
+  } else if (match_cmd(par, "spd.***")) {
+    tmp = &(pc->spd);
+  } else {
+    uart_send("\n\rUnknown parameter!");
+    return;
+  }
+
+  if (match_cmd(par+4, "k_p")) {
+    tmp->k_p = strtokval(val);
+  } else if (match_cmd(par+4, "k_i")) {
+    tmp->k_i = strtokval(val);
+  } else if (match_cmd(par+4, "k_d")) {
+    tmp->k_d = strtokval(val);
+  } else if (match_cmd(par+4, "trg")) {
+    tmp->trg = (uint16_t)atol(val);
   } else {
     uart_send("\n\rUnknown parameter!");
   }
@@ -210,22 +208,25 @@ void set_parameter(char *par, car_cfg *pc) {
 void get_parameters(car_cfg *pc) {
   char buf[8];
 
-  uart_send("\n\rcar_cfg");
-
-  uart_send("\n\r k_p: ");
-  printkval(pc->k_p);
-  uart_send("\n\r k_i: ");
-  printkval(pc->k_i);
-  uart_send("\n\r k_d: ");
-  printkval(pc->k_d);
-
-  uart_send("\n\r max_spd: ");
-  uart_send(itoa(pc->max_spd, buf, 10));
-
-  uart_send("\n\r trg_dist: ");
-  uart_send(itoa(pc->trg_dist, buf, 10));
-
-  uart_send("\n\r car_state: ");
+  uart_send("\n\rdst.k_p: ");
+  printkval(pc->dst.k_p);
+  uart_send("\n\rdst.k_i: ");
+  printkval(pc->dst.k_i);
+  uart_send("\n\rdst.k_d: ");
+  printkval(pc->dst.k_d);
+  uart_send("\n\rdst.trg: ");
+  uart_send(itoa(pc->dst.trg, buf, 10));
+  uart_send("\n\r");
+  uart_send("\n\rspd.k_p: ");
+  printkval(pc->spd.k_p);
+  uart_send("\n\rspd.k_i: ");
+  printkval(pc->spd.k_i);
+  uart_send("\n\rspd.k_d: ");
+  printkval(pc->spd.k_d);
+  uart_send("\n\rspd.trg: ");
+  uart_send(itoa(pc->spd.trg, buf, 10));
+  uart_send("\n\r");
+  uart_send("\n\rcar_state: ");
   switch (pc->car_state) {
   case WAIT:
     uart_send("WAIT");
@@ -244,7 +245,7 @@ void get_parameters(car_cfg *pc) {
 
 void plot_parameter(char *base, car_diag *pd, cmd_status stat) {
   char *par = find_next_word(base);
-  static uint8_t old_x[8] = {0};
+  static uint8_t old_x[16] = {0};
   uint8_t y_val = 0;
   uint8_t x_val;
   uint8_t zero;
@@ -259,34 +260,42 @@ void plot_parameter(char *base, car_diag *pd, cmd_status stat) {
     y_val++;
     zero = 32;
 
+    pid_diag *tmp = NULL;
+
     if (match_cmd(par, "dist")) {
         x_val = pd->dist / 1024;
         zero = 0;
-    } else if (match_cmd(par, "err")) {
-        x_val = pd->err / 1024 + 32;
-    } else if (match_cmd(par, "s_*")) {
-      if (par[2] == 'p') {
-        x_val = pd->s_p / 1024 + 32;
-      } else if (par[2] == 'i') {
-        x_val = pd->s_i / 1024 + 32;
-      } else if (par[2] == 'd') {
-        x_val = pd->s_d / 1024 + 32;
-      }
-    } else if (match_cmd(par, "servo_angle")) {
-        x_val = pd->servo_angle / 4 + 32;
-    } else if (match_cmd(par, "motor_speed")) {
-        x_val = pd->motor_speed / 4 + 32;
+    } else if (match_cmd(par, "speed")) {
+        x_val = pd->speed / 1024 + 32;
+    } else if (match_cmd(par, "dst.***")) {
+        tmp = &(pd->dst);
+    } else if (match_cmd(par, "spd.***")) {
+        tmp = &(pd->spd);
     }
 
-    print_xy("0", zero+6, y_val);
-    print_xy(" ", old_x[y_val]+5, y_val);
-    print_xy("*", x_val+5, y_val);
+    if(tmp) {
+      if (match_cmd(par+4, "s_p")) {
+        x_val = tmp->s_p / 1024 + 32;
+      } else if (match_cmd(par+4, "s_i")) {
+        x_val = tmp->s_i / 1024 + 32;
+      } else if (match_cmd(par+4, "s_d")) {
+        x_val = tmp->s_d / 1024 + 32;
+      } else if (match_cmd(par+4, "err")) {
+        x_val = tmp->err_p / 1024 + 32;
+      } else if (match_cmd(par+4, "out")) {
+        x_val = tmp->out / 1024 + 32;
+      }
+    }
+
+    print_xy("0", zero+PLOT_NAME_SZ+2, y_val);
+    print_xy(" ", old_x[y_val]+PLOT_NAME_SZ+2, y_val);
+    print_xy("*", x_val+PLOT_NAME_SZ+2, y_val);
 
     if (stat == CMD_PEND) {
       uart_send("\r");
-      uart_send_sz(par, 3);
-      uart_send(" |");
-      print_xy("|", 69, y_val);
+      uart_send_until(par, ' ');
+      print_xy("|", PLOT_NAME_SZ+1, y_val);
+      print_xy("|", PLOT_NAME_SZ+66, y_val);
     }
 
     old_x[y_val] = x_val;

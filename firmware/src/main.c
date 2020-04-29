@@ -23,6 +23,8 @@ int main(void) {
     /* Print error */
   }
 
+  config.dst.per = LOOP_INTERVAL_MS;
+  config.spd.per = LOOP_INTERVAL_MS;
   config.car_state = WAIT;
 
   /* Start delay */
@@ -54,9 +56,8 @@ int main(void) {
     adc_sample_channels();
     diagnostics.dist = sensor_get_value(ADC_SENS_OFFS);
 
-    diagnostics.servo_angle = calc_y(&config, &diagnostics);
-
-    diagnostics.motor_speed = config.max_spd;
+    calc_y(&(config.dst), &(diagnostics.dst), diagnostics.dist);
+    calc_y(&(config.spd), &(diagnostics.spd), diagnostics.speed);
 
     char key;
     while (fifo_pop(&key, &rx_fifo) == NONE) {
@@ -79,8 +80,8 @@ int main(void) {
     }
 
     if (config.car_state == RUN) {
-      motor_set_speed(diagnostics.motor_speed);
-      servo_set_angle(diagnostics.servo_angle);
+      motor_set_speed((int8_t)(diagnostics.spd.out/256));
+      servo_set_angle((int8_t)(diagnostics.dst.out/256));
     } else {
       motor_set_speed(0);
       servo_set_angle(0);
