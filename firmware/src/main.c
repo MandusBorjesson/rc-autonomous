@@ -23,8 +23,8 @@ int main(void) {
     /* Print error */
   }
 
-  config.dst.per = LOOP_INTERVAL_MS;
-  config.spd.per = LOOP_INTERVAL_MS;
+  config.dst.per = DST_INTERVAL_MS;
+  config.spd.per = SPD_INTERVAL_MS;
   config.car_state = WAIT;
 
   /* Start delay */
@@ -48,46 +48,59 @@ int main(void) {
   motor_set_speed(0);
 
   while (1) {
-    OE_IOBANK->ODR &= ~(1 << OE_PIN_Pos);
-
-    uint32_t counter = 0xC00003;
-    spi_send((char*)&counter, 3);
-
-    adc_sample_channels();
-    diagnostics.dist = sensor_get_value(ADC_SENS_OFFS);
-
-    calc_y(&(config.dst), &(diagnostics.dst), diagnostics.dist);
-    calc_y(&(config.spd), &(diagnostics.spd), diagnostics.speed);
-
-    char key;
-    while (fifo_pop(&key, &rx_fifo) == NONE) {
-      uart_handle_key(key, &cmd_line);
-    }
-
-    if (cmd_line.status != CMD_NONE) {
-      cmd_line.status = handle_cmd(cmd_line.buf, &config,
-                                   &diagnostics, cmd_line.status);
-      if (cmd_line.status == CMD_NONE) {
-        uart_send("\r\n> ");
-        memset(cmd_line.buf, 0, CMD_BUF_SZ);
-        cmd_line.cur_pos = 0;
-        cmd_line.counter = 0;
-      }
-    }
-
     if ( startpin_get() == 0 ) {
       config.car_state = RUN;
     }
 
-    if (config.car_state == RUN) {
-      motor_set_speed((int8_t)(diagnostics.spd.out/256));
-      servo_set_angle((int8_t)(diagnostics.dst.out/256));
-    } else {
-      motor_set_speed(0);
-      servo_set_angle(0);
-    }
-    OE_IOBANK->ODR |= (1 << OE_PIN_Pos);
+    if ((WUP_REASON & WUP_CLI) != 0) {
+      WUP_REASON &= ~WUP_CLI;
+      char key;
+      while (fifo_pop(&key, &rx_fifo) == NONE) {
+        uart_handle_key(key, &cmd_line);
+      }
 
+      if (cmd_line.status != CMD_NONE) {
+        cmd_line.status = handle_cmd(cmd_line.buf, &config,
+                                    &diagnostics, cmd_line.status);
+        if (cmd_line.status == CMD_NONE) {
+          uart_send("\r\n> ");
+          memset(cmd_line.buf, 0, CMD_BUF_SZ);
+          cmd_line.cur_pos = 0;
+          cmd_line.counter = 0;
+        }
+      }
+    }
+    if ((WUP_REASON & WUP_DST) != 0) {
+      WUP_REASON &= ~WUP_DST;
+      adc_sample_channels();
+      diagnostics.dist = sensor_get_value(ADC_SENS_OFFS);
+      calc_y(&(config.dst), &(diagnostics.dst), diagnostics.dist);
+
+      if (config.car_state == RUN) {
+        servo_set_angle((int8_t)(diagnostics.dst.out/256));
+      } else {
+        servo_set_angle(0);
+      }
+    }
+    if ((WUP_REASON & WUP_SPD) != 0) {
+      WUP_REASON &= ~WUP_SPD;
+      diagnostics.speed = TIM2->CNT;
+
+      calc_y(&(config.spd), &(diagnostics.spd), diagnostics.speed);
+
+      if (config.car_state == RUN) {
+        motor_set_speed((int8_t)(diagnostics.spd.out/256));
+      } else {
+        motor_set_speed(0);
+      }
+    }
+    if ((WUP_REASON & WUP_SPI) != 0) {
+      WUP_REASON &= ~WUP_SPI;
+      OE_IOBANK->ODR &= ~(1 << OE_PIN_Pos);
+      uint32_t counter = 0xC00003;
+      spi_send((char*)&counter, 3);
+      OE_IOBANK->ODR |= (1 << OE_PIN_Pos);
+    }
     enter_sleep();
   }
 }
@@ -123,16 +136,23 @@ void sysclk_cfg(void) {
 }
 
 void setup_main(void) {
-  RCC->APB2ENR |= RCC_APB2ENR_TIM16EN;  // Enable clock
-  MAIN_LOOP_TIMER->PSC = 2400;
-  MAIN_LOOP_TIMER->ARR = LOOP_INTERVAL_MS;
-  MAIN_LOOP_TIMER->DIER = TIM_DIER_UIE;
-  MAIN_LOOP_TIMER->EGR |= TIM_EGR_UG;
-  MAIN_LOOP_TIMER->CR1 |= TIM_CR1_ARPE |
-                          TIM_CR1_CEN;
+  RCC->APB2ENR |= RCC_APB2ENR_TIM1EN |
+                  RCC_APB2ENR_DBGMCUEN;
+  DBGMCU->APB2FZ |= DBGMCU_APB2_FZ_DBG_TIM1_STOP;
 
-  NVIC_EnableIRQ(TIM16_IRQn);
-  NVIC_SetPriority(TIM16_IRQn, 2);
+  MAIN_LOOP_TIMER->PSC = 24000;
+  MAIN_LOOP_TIMER->CCR1 = CLI_INTERVAL_MS;
+  MAIN_LOOP_TIMER->CCR2 = DST_INTERVAL_MS;
+  MAIN_LOOP_TIMER->CCR3 = SPD_INTERVAL_MS;
+  MAIN_LOOP_TIMER->CCR4 = SPI_INTERVAL_MS;
+  MAIN_LOOP_TIMER->DIER = TIM_DIER_CC1IE |
+                          TIM_DIER_CC2IE |
+                          TIM_DIER_CC3IE |
+                          TIM_DIER_CC4IE;
+  MAIN_LOOP_TIMER->CR1 |= TIM_CR1_CEN;
+
+  NVIC_EnableIRQ(TIM1_CC_IRQn);
+  NVIC_SetPriority(TIM1_CC_IRQn, 2);
 }
 
 void enter_sleep(void) {
