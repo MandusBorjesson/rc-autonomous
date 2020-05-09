@@ -74,9 +74,9 @@ int main(void) {
       WUP_REASON &= ~WUP_DST;
       adc_sample_channels();
       diagnostics.dist = sensor_get_value(ADC_SENS_OFFS);
-      calc_y(&(config.dst), &(diagnostics.dst), diagnostics.dist);
 
       if (config.car_state == RUN) {
+        calc_y(&(config.dst), &(diagnostics.dst), diagnostics.dist);
         servo_set_angle((int8_t)(diagnostics.dst.out/256));
       } else {
         servo_set_angle(0);
@@ -85,9 +85,9 @@ int main(void) {
     if ((WUP_REASON & WUP_SPD) != 0) {
       WUP_REASON &= ~WUP_SPD;
       diagnostics.speed = motor_get_speed(config.spd.per);
-      calc_y(&(config.spd), &(diagnostics.spd), diagnostics.speed);
 
       if (config.car_state == RUN) {
+        calc_y(&(config.spd), &(diagnostics.spd), diagnostics.speed);
         motor_set_speed((int8_t)(diagnostics.spd.out/256));
       } else {
         motor_set_speed(0);
