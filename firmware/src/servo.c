@@ -24,6 +24,6 @@ void servo_init(void) {
 }
 
 void servo_set_angle(int8_t angle) {
-  SERVO_TIM->CCR1 = 8192 - SERVO_CENTER - angle;
+  SERVO_TIM->CCR1 = 8192 - SERVO_CENTER + angle;
 }
 
