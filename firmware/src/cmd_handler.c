@@ -246,8 +246,10 @@ void get_parameters(car_cfg *pc) {
 void plot_parameter(char *base, car_diag *pd, cmd_status stat) {
   char *par = find_next_word(base);
   static uint8_t old_x[16] = {0};
+  char buf[10];
   uint8_t y_val = 0;
   uint8_t x_val;
+  int32_t x_org;
   uint8_t zero;
 
   if (stat == CMD_PEND) {
@@ -256,40 +258,47 @@ void plot_parameter(char *base, car_diag *pd, cmd_status stat) {
   }
 
   while (par) {
-    x_val = 0;
+    x_org = 0;
     y_val++;
-    zero = 32;
+    zero = 0;
 
     pid_diag *tmp = NULL;
 
     if (match_cmd(par, "dist")) {
-        x_val = pd->dist / 1024;
+        x_org = pd->dist;
         zero = 0;
     } else if (match_cmd(par, "speed")) {
-        x_val = pd->speed / 1024 + 32;
+        x_org = pd->speed;
+        zero = 0;
     } else if (match_cmd(par, "dst.***")) {
         tmp = &(pd->dst);
+        zero = 32;
     } else if (match_cmd(par, "spd.***")) {
         tmp = &(pd->spd);
+        zero = 32;
     }
 
     if(tmp) {
       if (match_cmd(par+4, "s_p")) {
-        x_val = tmp->s_p / 1024 + 32;
+        x_org = tmp->s_p;
       } else if (match_cmd(par+4, "s_i")) {
-        x_val = tmp->s_i / 1024 + 32;
+        x_org = tmp->s_i;
       } else if (match_cmd(par+4, "s_d")) {
-        x_val = tmp->s_d / 1024 + 32;
+        x_org = tmp->s_d;
       } else if (match_cmd(par+4, "err")) {
-        x_val = tmp->err_p / 1024 + 32;
+        x_org = tmp->err_p;
       } else if (match_cmd(par+4, "out")) {
-        x_val = tmp->out / 1024 + 32;
+        x_org = tmp->out;
       }
     }
 
+    x_val = x_org / 1024 + zero;
     print_xy("0", zero+PLOT_NAME_SZ+2, y_val);
     print_xy(" ", old_x[y_val]+PLOT_NAME_SZ+2, y_val);
     print_xy("*", x_val+PLOT_NAME_SZ+2, y_val);
+
+    print_xy("       ", PLOT_NAME_SZ+68, y_val);
+    print_xy(itoa(x_org, buf, 10), PLOT_NAME_SZ+68, y_val);
 
     if (stat == CMD_PEND) {
       uart_send("\r");
