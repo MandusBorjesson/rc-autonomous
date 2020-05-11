@@ -8,10 +8,20 @@ extern "C" {
 #include "stm32f0xx.h"
 #include "types.h"
 
-#define LOOP_INTERVAL_MS 200
-#define MAIN_LOOP_TIMER TIM16
+#define CLI_INTERVAL_MS 100
+#define DST_INTERVAL_MS 20
+#define SPD_INTERVAL_MS 250
+#define SPI_INTERVAL_MS 50
+#define MAIN_LOOP_TIMER TIM1
 #define SENSOR_COUNT 3
 #define STARTPIN_IOBANK GPIOB
+
+#define WUP_CLI (1 << 0)
+#define WUP_DST (1 << 1)
+#define WUP_SPD (1 << 2)
+#define WUP_SPI (1 << 3)
+
+char WUP_REASON;
 
 car_diag diagnostics;
 car_cfg config;

@@ -16,11 +16,7 @@ extern "C" {
 #define S_MAX 32767
 #define S_MIN -S_MAX
 
-int16_t calc_p(int16_t err, uint16_t k_p);
-int16_t calc_i(int16_t err, uint16_t k_i);
-int16_t calc_d(int16_t err, uint16_t k_d);
-
-int8_t calc_y(car_cfg* cfg, car_diag* diag);
+void calc_y(pid_cfg* cfg, pid_diag* diag, uint16_t val);
 
 int16_t limit_signal(int32_t s);
 #ifdef __cplusplus

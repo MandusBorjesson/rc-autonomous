@@ -37,6 +37,7 @@ extern "C" {
 
 void uart_init(void);
 
+void uart_send_until(char* data, char terminator);
 void uart_send(char *data);
 void uart_send_sz(char *data, uint16_t size);
 

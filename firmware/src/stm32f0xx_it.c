@@ -51,8 +51,27 @@ void DMA1_Channel2_3_IRQHandler(void) {
   DMA1->IFCR |= DMA_IFCR_CGIF3 | DMA_IFCR_CGIF2;
 }
 
-void TIM16_IRQHandler(void) {
-  TIM16->SR &= ~TIM_SR_UIF;  // Clear interrupt
+void TIM1_CC_IRQHandler (void) {
+  if((TIM1->SR & TIM_SR_CC1IF) != 0) {
+    TIM1->CCR1 += CLI_INTERVAL_MS;
+    TIM1->SR &= ~TIM_SR_CC1IF;
+    WUP_REASON |= WUP_CLI;
+  }
+  if ((TIM1->SR & TIM_SR_CC2IF) != 0) {
+    TIM1->CCR2 += DST_INTERVAL_MS;
+    TIM1->SR &= ~TIM_SR_CC2IF;
+    WUP_REASON |= WUP_DST;
+  }
+  if ((TIM1->SR & TIM_SR_CC3IF) != 0) {
+    TIM1->CCR3 += SPD_INTERVAL_MS;
+    TIM1->SR &= ~TIM_SR_CC3IF;
+    WUP_REASON |= WUP_SPD;
+  }
+  if ((TIM1->SR & TIM_SR_CC4IF) != 0) {
+    TIM1->CCR4 += SPI_INTERVAL_MS;
+    TIM1->SR &= ~TIM_SR_CC4IF;
+    WUP_REASON |= WUP_SPI;
+  }
   enter_run();
 }
 

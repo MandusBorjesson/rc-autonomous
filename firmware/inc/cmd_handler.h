@@ -7,6 +7,8 @@ extern "C" {
 
 #include "types.h"
 
+#define PLOT_NAME_SZ 8
+
 cmd_status handle_cmd(char *cmd, car_cfg *pc, car_diag *pd, cmd_status stat);
 
 #ifdef __cplusplus

@@ -12,25 +12,37 @@ extern "C" {
 
 typedef enum car_status {WAIT, STOP, RUN} car_status;
 
-typedef struct car_cfg {
-  /* Inputs */
+typedef struct pid_cfg {
+  uint16_t per;
+  uint16_t trg;
   uint16_t k_p;
   uint16_t k_i;
   uint16_t k_d;
-  uint8_t max_spd;
-  uint16_t trg_dist;
+} pid_cfg;
+
+typedef struct pid_diag {
+  int16_t err_p;
+  int32_t err_i;
+  int16_t err_d;
+  int16_t s_p;
+  int16_t s_i;
+  int16_t s_d;
+  int16_t out;
+} pid_diag;
+
+typedef struct car_cfg {
+  /* Inputs */
   car_status car_state;
+  pid_cfg dst;
+  pid_cfg spd;
 } car_cfg;
 
 typedef struct car_diag {
   /* Outputs */
+  uint16_t speed;
   uint16_t dist;
-  int16_t err;
-  int16_t s_p;
-  int16_t s_i;
-  int16_t s_d;
-  int8_t servo_angle;
-  int8_t motor_speed;
+  pid_diag dst;
+  pid_diag spd;
 } car_diag;
 
 typedef enum cmd_status {CMD_NONE, CMD_PEND, CMD_BUSY} cmd_status;
